@@ -112,6 +112,17 @@ module.exports = {
         });
         menuText += `\n`;
       }
+
+      // Interaction Commands
+      if (categories.interation) {
+        menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+        menuText += `┃ 🧭 INTERACTION COMMAND\n`;
+        menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+        categories.interaction.forEach(cmd => {
+          menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+        });
+        menuText += `\n`;
+      }
       
       // Utility Commands
       if (categories.utility) {
@@ -167,7 +178,7 @@ module.exports = {
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: config.newsletterJid || '120363161513685998@newsletter',
-              newsletterName: config.botName,
+              newsletterName: config.owner,
               serverMessageId: -1
             }
           }
