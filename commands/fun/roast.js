@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('../config');
+const config = require('../../config');
 
 const roasts = [
     "You're proof that Wi-Fi signals can lose brain cells.",
