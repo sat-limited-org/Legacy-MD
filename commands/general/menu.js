@@ -163,7 +163,7 @@ module.exports = {
           caption: menuText,
           mentions: [extra.sender],
           contextInfo: {
-            forwardingScore: 1,
+            forwardingScore: 999,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
               newsletterJid: config.newsletterJid || '120363161513685998@newsletter',
