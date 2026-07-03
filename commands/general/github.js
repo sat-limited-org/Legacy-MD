@@ -18,8 +18,8 @@ module.exports = {
             const chatId = extra.from;
             
             // GitHub repository URL
-            const repoUrl = 'https://github.com/mruniquehacker/KnightBot-Mini';
-            const apiUrl = 'https://api.github.com/repos/mruniquehacker/KnightBot-Mini';
+            const repoUrl = 'https://github.com/sat-limited-org/Legacy-MD';
+            const apiUrl = 'https://api.github.com/repos/sat-limited-org/Legacy-MD';
             
             // Send loading message
             const loadingMsg = await extra.reply('🔍 Fetching GitHub repository information...');
@@ -68,8 +68,8 @@ module.exports = {
                 
                 let fallbackMessage = `╭━━『 *GitHub Repository* 』━━╮\n\n`;
                 fallbackMessage += `🤖 *Bot Name:* ${config.botName}\n`;
-                fallbackMessage += `🔗 *Repository:* KnightBot-Mini\n`;
-                fallbackMessage += `👨‍💻 *Owner:* mruniquehacker\n`;
+                fallbackMessage += `🔗 *Repository:* Legacy MD\n`;
+                fallbackMessage += `👨‍💻 *Owner:* sat-limited-org\n`;
                 fallbackMessage += `🌐 *URL:* ${repoUrl}\n\n`;
                 fallbackMessage += `⚠️ *Note:* Unable to fetch real-time statistics.\n`;
                 fallbackMessage += `Please visit the repository directly for latest stats.\n\n`;
