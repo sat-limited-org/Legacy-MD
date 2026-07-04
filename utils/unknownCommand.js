@@ -1,5 +1,6 @@
-const unknownCommand = require('./utils/unknownCommand');
+const unknownCommand = require('../commands/unknown/unknown');
 
-if (!command) {
-    return unknownCommand(sock, msg, commandName, prefix);
-}
+module.exports = async (sock, msg, commandName, prefix) => {
+  // Forward to the canonical unknown command handler
+  return await unknownCommand(sock, msg, commandName, prefix);
+};
