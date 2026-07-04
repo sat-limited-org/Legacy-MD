@@ -407,7 +407,7 @@ const handleMessage = async (sock, msg) => {
           const prefixList = ['.', '/', '#'];
           if (prefixList.includes(text?.trim()[0])) {
             await sock.sendMessage(jid, {
-              react: { text: '⏳', key: msg.key }
+              react: { text: '⏳','🤖', key: msg.key }
             });
           }
         }
@@ -771,6 +771,36 @@ const handleMessage = async (sock, msg) => {
     if (config.selfMode && !isOwner(sender)) {
       return;
     }
+
+// ===============================
+// Allowed Groups System
+// ===============================
+const allowedGroupsFile = path.join(__dirname, 'database', 'allowedGroups.json');
+
+let allowedGroups = [];
+
+try {
+    if (fs.existsSync(allowedGroupsFile)) {
+        allowedGroups = JSON.parse(fs.readFileSync(allowedGroupsFile, 'utf8'));
+    }
+} catch {
+    allowedGroups = [];
+}
+
+// Only apply in groups
+if (isGroup && !isOwner(sender)) {
+
+    // Allow the allow/deny commands to run
+    if (!['allow', 'deny'].includes(commandName)) {
+
+        if (!allowedGroups.includes(from)) {
+            return sock.sendMessage(from, {
+                text: '🚫 This group is not authorized to use this bot.\n\nAsk the bot owner to run *.allow* first.'
+            }, { quoted: msg });
+        }
+
+    }
+}
     
     // Permission checks
     if (command.ownerOnly && !isOwner(sender)) {
