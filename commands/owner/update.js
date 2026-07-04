@@ -156,7 +156,8 @@ module.exports = {
     }
 
     try {
-      await extra.reply('🔄 Updating the bot, please wait…\n\n> 🤖 Powered by config.owner');
+      await extra.reply('🔄 Updating the bot, please wait…\n\n> 🤖 Powered By SAT Limited');
+      await extra.reply('⚡ Thanks for using Legacy MD By The *SAT Limited Team*\n Please continue supporting our project ❤️\n\n> 🤖 Powered By SAT Limited');
 
       const { copiedFiles } = await updateViaZip(zipUrl);
 
