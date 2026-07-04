@@ -14,41 +14,53 @@ module.exports = {
 
     async execute(sock, msg, args, extra) {
         try {
-            const sender = msg.key.participant || msg.key.remoteJid;
+            const remoteJid = msg.key.remoteJid;
 
-            const target =
-                msg.message?.extendedTextMessage?.contextInfo?.mentionedJid?.[0];
+            // Works for both group & DM safely
+            const sender =
+                msg.key.participant ||
+                msg.participant ||
+                remoteJid;
 
-            const { data } = await axios.get("https://api.waifu.pics/sfw/hug");
+            // Safe mention extraction (prevents crash)
+            const mentionedJid =
+                msg.message?.extendedTextMessage?.contextInfo?.mentionedJid ||
+                msg.message?.imageMessage?.contextInfo?.mentionedJid ||
+                msg.message?.conversation?.contextInfo?.mentionedJid ||
+                [];
+
+            const target = mentionedJid[0];
+
+            // Fetch hug image
+            const res = await axios.get("https://api.waifu.pics/sfw/hug");
+            const imageUrl = res?.data?.url;
+
+            if (!imageUrl) {
+                return extra.reply("❌ Couldn't fetch hug image right now.");
+            }
 
             let message;
 
             if (target) {
                 message = {
-                    image: { url: data.url },
+                    image: { url: imageUrl },
                     caption: `🤗 @${sender.split("@")[0]} gives @${target.split("@")[0]} a warm hug!`,
                     mentions: [sender, target],
                     contextInfo: newsletterCtx()
                 };
             } else {
                 message = {
-                    image: { url: data.url },
+                    image: { url: imageUrl },
                     caption: "🤗 Here's a warm anime hug just for you!",
                     contextInfo: newsletterCtx()
                 };
             }
 
-            await sock.sendMessage(
-                msg.key.remoteJid,
-                message,
-                {
-                    quoted: msg
-                }
-            );
+            await sock.sendMessage(remoteJid, message, { quoted: msg });
 
         } catch (error) {
             console.error("Hug command error:", error);
-            await extra.reply("❌ Failed to fetch a hug image.");
+            return extra.reply("❌ Failed to send hug. Try again later.");
         }
     }
 };
