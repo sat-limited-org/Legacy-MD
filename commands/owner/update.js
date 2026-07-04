@@ -156,7 +156,7 @@ module.exports = {
     }
 
     try {
-      await extra.reply('🔄 Updating the bot, please wait…\n\n🤖 Powered by ${config.owner}');
+      await extra.reply('🔄 Updating the bot, please wait…\n\n> 🤖 Powered by config.owner');
 
       const { copiedFiles } = await updateViaZip(zipUrl);
 
