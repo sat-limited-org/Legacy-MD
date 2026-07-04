@@ -5,6 +5,7 @@ const unknownCommand = require('../../utils/unknownCommand');
 
 module.exports = async (sock, msg, command, prefix) => {
     const from = msg.key.remoteJid;
+    invalidCommand: `true`;
 
     return await sock.sendMessage(from, {
         text:
