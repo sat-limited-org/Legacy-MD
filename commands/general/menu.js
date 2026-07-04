@@ -33,6 +33,7 @@ module.exports = {
       let menuText = `╭━━『 *${config.botName}* 』━━╮\n\n`;
       menuText += `👋 Hello @${extra.sender.split('@')[0]}!\n\n`;
       menuText += `⚡ Prefix: ${config.prefix}\n`;
+      menuText += `🤖 Mode: ${mode}\n`;
       menuText += `📦 Total Commands: ${commands.size}\n`;
       menuText += `👑 Owner: ${displayOwner}\n\n`;
       
@@ -160,7 +161,7 @@ if (categories.interaction) {
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
       menuText += `💡 Type ${config.prefix}help <command> for more info\n`;
       menuText += `🌟 Bot Version: 1.0.0\n`;
-      menuText += `> Powered by config.owner\n`;
+      menuText += `> Powered by *SAT Limited*\n`;
       
       // Send menu with image
       const fs = require('fs');
@@ -178,7 +179,7 @@ if (categories.interaction) {
             forwardingScore: 999,
             isForwarded: true,
             forwardedNewsletterMessageInfo: {
-              newsletterJid: config.newsletterJid || '120363161513685998@newsletter',
+              newsletterJid: config.newsletterJid || '120363408718616120@newsletter',
               newsletterName: config.owner,
               serverMessageId: -1
             }
