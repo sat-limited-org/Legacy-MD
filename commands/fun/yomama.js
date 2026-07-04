@@ -2,7 +2,7 @@
  * YoMama Command - Random yo mama jokes
  */
 
-const { newsletterCtx } = require('../utils/context');
+const { newsletterCtx } = require('../../utils/context');
 
 const jokes = [
   "Yo mama so dumb, when a thief entered your house she went to the kitchen to call 911.... using a microwave.",
