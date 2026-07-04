@@ -114,15 +114,15 @@ module.exports = {
       }
 
       // Interaction Commands
-      if (categories.interation) {
-        menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🧭 INTERACTION COMMAND\n`;
-        menuText += `┗━━━━━━━━━━━━━━━━━\n`;
-        categories.interaction.forEach(cmd => {
-          menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
-        });
-        menuText += `\n`;
-      }
+if (categories.interaction) {
+  menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+  menuText += `┃ 🤝 INTERACTION COMMAND\n`;
+  menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+  categories.interaction.forEach(cmd => {
+    menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+  });
+  menuText += `\n`;
+}
       
       // Utility Commands
       if (categories.utility) {
@@ -160,6 +160,7 @@ module.exports = {
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
       menuText += `💡 Type ${config.prefix}help <command> for more info\n`;
       menuText += `🌟 Bot Version: 1.0.0\n`;
+      menuText += `> Powered by config.owner\n`;
       
       // Send menu with image
       const fs = require('fs');
