@@ -15,87 +15,100 @@ module.exports = {
 
   async execute(sock, msg, args) {
     try {
-      // Get instance-specific config
-      const instanceConfig = config.getConfigFromSocket(sock);
+      const botName = config.botName || "Legacy MD";
 
       const text = args.join(' ');
       const chatId = msg.key.remoteJid;
 
-      const searchQuery = text.trim();
-
-      if (!searchQuery) {
+      if (!text.trim()) {
         return await sock.sendMessage(chatId, {
           text: 'What video do you want to download?'
         }, { quoted: msg });
       }
 
-      // Determine if input is a YouTube link
       let videoUrl = '';
       let videoTitle = '';
       let videoThumbnail = '';
 
-      if (searchQuery.startsWith('http://') || searchQuery.startsWith('https://')) {
-        videoUrl = searchQuery;
+      // If user entered a YouTube link
+      if (text.startsWith('http://') || text.startsWith('https://')) {
+        videoUrl = text;
       } else {
-        // Search YouTube for the video
-        const { videos } = await yts(searchQuery);
+        // Search YouTube
+        const { videos } = await yts(text);
+
         if (!videos || videos.length === 0) {
           return await sock.sendMessage(chatId, {
             text: 'No videos found!'
           }, { quoted: msg });
         }
+
         videoUrl = videos[0].url;
         videoTitle = videos[0].title;
         videoThumbnail = videos[0].thumbnail;
       }
 
-      // Send thumbnail immediately
+      // Send thumbnail
       try {
         const ytId = (videoUrl.match(/(?:youtu\.be\/|v=)([a-zA-Z0-9_-]{11})/) || [])[1];
-        const thumb = videoThumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/sddefault.jpg` : undefined);
-        const captionTitle = videoTitle || searchQuery;
+
+        const thumb =
+          videoThumbnail ||
+          (ytId
+            ? `https://i.ytimg.com/vi/${ytId}/sddefault.jpg`
+            : null);
+
         if (thumb) {
           await sock.sendMessage(chatId, {
             image: { url: thumb },
-            caption: `*${captionTitle}*\nDownloading...`
+            caption: `*${videoTitle || text}*\nDownloading...`
           }, { quoted: msg });
         }
       } catch (e) {
-        console.error('[VIDEO] thumb error:', e?.message || e);
+        console.log(e);
       }
 
       // Validate YouTube URL
-      let urls = videoUrl.match(/(?:https?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?v=|v\/|embed\/|shorts\/|playlist\?list=)?)([a-zA-Z0-9_-]{11})/gi);
-      if (!urls) {
+      if (!/(youtu\.be|youtube\.com)/i.test(videoUrl)) {
         return await sock.sendMessage(chatId, {
-          text: 'This is not a valid YouTube link!'
+          text: 'Invalid YouTube link.'
         }, { quoted: msg });
       }
 
-      // Get video: try EliteProTech first, then Yupra, then Okatsu fallback
       let videoData;
+
       try {
         videoData = await APIs.getEliteProTechVideoByUrl(videoUrl);
-      } catch (e1) {
+      } catch {
         try {
           videoData = await APIs.getYupraVideoByUrl(videoUrl);
-        } catch (e2) {
+        } catch {
           videoData = await APIs.getOkatsuVideoByUrl(videoUrl);
         }
       }
 
-      // Send video directly using the download URL
+      if (!videoData || !videoData.download) {
+        throw new Error("Unable to fetch download link.");
+      }
+
       await sock.sendMessage(chatId, {
-        video: { url: videoData.download },
+        video: {
+          url: videoData.download
+        },
         mimetype: 'video/mp4',
-        fileName: `${(videoData.title || videoTitle || 'video').replace(/[^\w\s-]/g, '')}.mp4`,
-        caption: `*${videoData.title || videoTitle || 'Video'}*\n\n> *_Downloaded by ${instanceConfig.botName}_*`
+        fileName: `${(videoData.title || videoTitle || 'video')
+          .replace(/[^\w\s-]/g, '')}.mp4`,
+        caption:
+`*${videoData.title || videoTitle || 'Video'}*
+
+> *_Downloaded by ${botName}_*`
       }, { quoted: msg });
 
     } catch (error) {
-      console.error('[VIDEO] Command Error:', error?.message || error);
+      console.error('[VIDEO]', error);
+
       await sock.sendMessage(msg.key.remoteJid, {
-        text: 'Download failed: ' + (error?.message || 'Unknown error')
+        text: `Download failed:\n${error.message || 'Unknown error'}`
       }, { quoted: msg });
     }
   }
