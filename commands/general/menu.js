@@ -33,7 +33,6 @@ module.exports = {
       let menuText = `╭━━『 *${config.botName}* 』━━╮\n\n`;
       menuText += `👋 Hello @${extra.sender.split('@')[0]}!\n\n`;
       menuText += `⚡ Prefix: ${config.prefix}\n`;
-      menuText += `🤖 Mode: ${mode}\n`;
       menuText += `📦 Total Commands: ${commands.size}\n`;
       menuText += `👑 Owner: ${displayOwner}\n\n`;
       
