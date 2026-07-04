@@ -1,7 +1,7 @@
 'use strict';
 
 const config = require('../../config');
-const unknownCommand = require('../utils/unknownCommand');
+const unknownCommand = require('../../utils/unknownCommand');
 
 module.exports = async (sock, msg, command, prefix) => {
     const from = msg.key.remoteJid;
