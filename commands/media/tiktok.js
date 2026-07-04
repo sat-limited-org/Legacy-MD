@@ -2,189 +2,94 @@
  * TikTok Downloader - Download TikTok videos
  */
 
-const { ttdl } = require('ruhend-scraper');
-const axios = require('axios');
-const APIs = require('../../utils/api');
-const config = require('../../config');
+'use strict';
 
-// Store processed message IDs to prevent duplicates
-const processedMessages = new Set();
+const axios    = require('axios');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
+const streamPipeline = promisify(pipeline);
+const fs       = require('fs');
+const os       = require('os');
+const path     = require('path');
+
+const ENDPOINTS = [
+    {
+        name: 'TikWM',
+        url:  (u) => `https://tikwm.com/api/?url=${encodeURIComponent(u)}`,
+        parse: (data) => {
+            if (!data?.data?.play) return null;
+            return { videoUrl: data.data.play, author: data.data.author, likes: data.data.digg_count };
+        }
+    },
+    {
+        name: 'Tiklydown',
+        url:  (u) => `https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(u)}`,
+        parse: (data) => {
+            if (!data?.videoUrl) return null;
+            return { videoUrl: data.videoUrl, author: data.author, likes: data.stats?.digg_count };
+        }
+    }
+];
 
 module.exports = {
-  name: 'tiktok',
-  aliases: ['tt', 'ttdl', 'tiktokdl'],
-  category: 'media',
-  description: 'Download TikTok videos',
-  usage: '.tiktok <TikTok URL>',
-  
-  async execute(sock, msg, args) {
-    try {
-      // Check if message has already been processed
-      if (processedMessages.has(msg.key.id)) {
-        return;
-      }
-      
-      // Add message ID to processed set
-      processedMessages.add(msg.key.id);
-      
-      // Clean up old message IDs after 5 minutes
-      setTimeout(() => {
-        processedMessages.delete(msg.key.id);
-      }, 5 * 60 * 1000);
-      
-      const text = msg.message?.conversation || 
-                   msg.message?.extendedTextMessage?.text ||
-                   args.join(' ');
-      
-      if (!text) {
-        return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Please provide a TikTok link for the video.' 
-        }, { quoted: msg });
-      }
-      
-      // Extract URL from command
-      const url = text.split(' ').slice(1).join(' ').trim();
-      
-      if (!url) {
-        return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Please provide a TikTok link for the video.' 
-        }, { quoted: msg });
-      }
-      
-      // Check for various TikTok URL formats
-      const tiktokPatterns = [
-        /https?:\/\/(?:www\.)?tiktok\.com\//,
-        /https?:\/\/(?:vm\.)?tiktok\.com\//,
-        /https?:\/\/(?:vt\.)?tiktok\.com\//,
-        /https?:\/\/(?:www\.)?tiktok\.com\/@/,
-        /https?:\/\/(?:www\.)?tiktok\.com\/t\//
-      ];
-      
-      const isValidUrl = tiktokPatterns.some(pattern => pattern.test(url));
-      
-      if (!isValidUrl) {
-        return await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'That is not a valid TikTok link. Please provide a valid TikTok video link.' 
-        }, { quoted: msg });
-      }
-      
-      await sock.sendMessage(msg.key.remoteJid, {
-        react: { text: '🔄', key: msg.key }
-      });
-      
-      try {
-        let videoUrl = null;
-        let title = null;
-        
-        // Try Siputzx API first
-        try {
-          const result = await APIs.getTikTokDownload(url);
-          videoUrl = result.videoUrl;
-          title = result.title;
-        } catch (apiError) {
-          console.error(`Siputzx API failed: ${apiError.message}`);
+    commands:    ['tiktok', 'tt', 'ttdl', 'tiktokdl'],
+    description: 'Download a TikTok video without watermark',
+    permission:  'public',
+    group:       true,
+    private:     true,
+    run: async (sock, message, args, { sender, contextInfo }) => {
+        const raw = args[0];
+        const url = raw?.match(/(https?:\/\/[^\s]+)/)?.[0];
+
+        if (!url || !/tiktok\.com|vt\.tiktok\.com/.test(url)) {
+            return sock.sendMessage(sender, {
+                text: '❌ Invalid TikTok URL!\n\nExample: .tiktok https://vt.tiktok.com/ZS...',
+                contextInfo
+            }, { quoted: message });
         }
-        
-        // If Siputzx API didn't work, try ttdl method
-        if (!videoUrl) {
-          try {
-            let downloadData = await ttdl(url);
-            if (downloadData && downloadData.data && downloadData.data.length > 0) {
-              const mediaData = downloadData.data;
-              for (let i = 0; i < Math.min(20, mediaData.length); i++) {
-                const media = mediaData[i];
-                const mediaUrl = media.url;
-                const isVideo = /\.(mp4|mov|avi|mkv|webm)$/i.test(mediaUrl) || media.type === 'video';
-                
-                if (isVideo) {
-                  await sock.sendMessage(msg.key.remoteJid, {
-                    video: { url: mediaUrl },
-                    mimetype: 'video/mp4',
-                    caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
-                  }, { quoted: msg });
-                } else {
-                  await sock.sendMessage(msg.key.remoteJid, {
-                    image: { url: mediaUrl },
-                    caption: `*DOWNLOADED BY ${config.botName.toUpperCase()}*`
-                  }, { quoted: msg });
-                }
-              }
-              return;
-            }
-          } catch (ttdlError) {
-            console.error('ttdl fallback also failed:', ttdlError.message);
-          }
-        }
-        
-        // Send the video if we got a URL
-        if (videoUrl) {
-          try {
-            // Download video as buffer
-            const videoResponse = await axios.get(videoUrl, {
-              responseType: 'arraybuffer',
-              timeout: 60000,
-              maxContentLength: 100 * 1024 * 1024, // 100MB limit
-              headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                'Accept': 'video/mp4,video/*,*/*;q=0.9',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'Accept-Encoding': 'gzip, deflate, br',
-                'Connection': 'keep-alive',
-                'Referer': 'https://www.tiktok.com/'
-              }
-            });
-            
-            const videoBuffer = Buffer.from(videoResponse.data);
-            
-            if (videoBuffer.length === 0) {
-              throw new Error('Video buffer is empty');
-            }
-            
-            const botName = config.botName.toUpperCase();
-            const caption = title ? `*DOWNLOADED BY ${botName}*\n\n📝 Title: ${title}` : `*DOWNLOADED BY ${botName}*`;
-            
-            await sock.sendMessage(msg.key.remoteJid, {
-              video: videoBuffer,
-              mimetype: 'video/mp4',
-              caption: caption
-            }, { quoted: msg });
-            
-            return;
-          } catch (downloadError) {
-            console.error(`Failed to download video: ${downloadError.message}`);
-            // Fallback to URL method
+
+        await sock.sendMessage(sender, {
+            text: '⏳ Processing TikTok video... (may take ~20 seconds)',
+            contextInfo
+        }, { quoted: message });
+
+        let result = null;
+        for (const ep of ENDPOINTS) {
             try {
-              const botName = config.botName.toUpperCase();
-              const caption = title ? `*DOWNLOADED BY ${botName}*\n\n📝 Title: ${title}` : `*DOWNLOADED BY ${botName}*`;
-              
-              await sock.sendMessage(msg.key.remoteJid, {
-                video: { url: videoUrl },
-                mimetype: 'video/mp4',
-                caption: caption
-              }, { quoted: msg });
-              return;
-            } catch (urlError) {
-              console.error(`URL method also failed: ${urlError.message}`);
+                const { data } = await axios.get(ep.url(url), {
+                    timeout: 25000,
+                    headers: { 'User-Agent': 'Mozilla/5.0', Accept: 'application/json' }
+                });
+                result = ep.parse(data);
+                if (result) { console.log(`[TikTok] Success via ${ep.name}`); break; }
+            } catch (e) {
+                console.warn(`[TikTok] ${ep.name} failed: ${e.message}`);
             }
-          }
         }
-        
-        // If we reach here, no method worked
-        return await sock.sendMessage(msg.key.remoteJid, { 
-          text: '❌ Failed to download TikTok video. All download methods failed. Please try again with a different link.' 
-        }, { quoted: msg });
-        
-      } catch (error) {
-        console.error('Error in TikTok download:', error);
-        await sock.sendMessage(msg.key.remoteJid, { 
-          text: 'Failed to download the TikTok video. Please try again with a different link.' 
-        }, { quoted: msg });
-      }
-    } catch (error) {
-      console.error('Error in TikTok command:', error);
-      await sock.sendMessage(msg.key.remoteJid, { 
-        text: 'An error occurred while processing the request. Please try again later.' 
-      }, { quoted: msg });
+
+        if (!result) {
+            return sock.sendMessage(sender, {
+                text: '❌ All download methods failed. The video may be private or restricted.',
+                contextInfo
+            }, { quoted: message });
+        }
+
+        const tempPath = path.join(os.tmpdir(), `tiktok_${Date.now()}.mp4`);
+        try {
+            const res = await axios({ method: 'get', url: result.videoUrl, responseType: 'stream', timeout: 30000 });
+            await streamPipeline(res.data, fs.createWriteStream(tempPath));
+
+            const stat = fs.statSync(tempPath);
+            if (stat.size < 1024) throw new Error('Downloaded file is too small');
+
+            const videoCaption = `🎵 *TikTok*  •  👤 ${result.author?.nickname || result.author?.name || 'Unknown'}  •  ❤️ ${result.likes ?? 'N/A'}`;
+            await sock.sendMessage(sender, {
+                video:   fs.readFileSync(tempPath),
+                caption: videoCaption,
+                contextInfo
+            }, { quoted: message });
+        } finally {
+            if (fs.existsSync(tempPath)) try { fs.unlinkSync(tempPath); } catch { /* ignore */ }
+        }
     }
-  }
 };
