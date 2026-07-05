@@ -63,6 +63,17 @@ module.exports = {
         });
         menuText += `\n`;
       }
+
+      // Educational Commands
+if (categories.education) {
+  menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+  menuText += `┃ 📚 EDUCATIONAL COMMANDS\n`;
+  menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+  categories.education.forEach(cmd => {
+    menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+  });
+  menuText += `\n`;
+}
       
       // Group Commands
       if (categories.group) {
