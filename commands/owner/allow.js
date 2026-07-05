@@ -6,7 +6,7 @@ const path = require('path');
 const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
 
 module.exports = {
-    commands: ['allow'],
+    name: ['allow'],
     aliases: ['gcallow','gca'],
     description: 'Allow this group to use the bot.',
     usage: '.allow',
