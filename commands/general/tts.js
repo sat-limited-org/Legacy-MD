@@ -2,128 +2,59 @@
  * TTS - Text to Speech Command
  */
 
-'use strict';
-
-const axios = require('axios');
-const { exec } = require('child_process');
+const gTTS = require('gtts');
 const fs = require('fs');
 const path = require('path');
+const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
 
-const VOICES = {
-    en: 'en',
-    fr: 'fr',
-    sw: 'sw',
-    ar: 'ar',
-    es: 'es',
-    de: 'de',
-    ja: 'ja',
-    zh: 'zh-CN',
-    hi: 'hi',
-    pt: 'pt'
-};
+async function ttsCommand(sock, chatId, text, message, language = 'en') {
+    if (!text) {
+        await sock.sendMessage(chatId, { text: '❌ Please provide the text for TTS conversion.' });
+        return;
+    }
 
-module.exports = {
-    name: 'tts',
-    aliases: ['speak','say','voice'],
-    description: 'Convert text into realistic speech.',
-    usage: '.tts <text>\n.tts <language> <text>',
-    permission: 'public',
-    group: true,
-    private: true,
-    category: 'general',
+    const baseName = `tts-${Date.now()}`;
+    const assetsDir = path.join(__dirname, '..', 'assets');
+    const mp3Path = path.join(assetsDir, `${baseName}.mp3`);
+    const oggPath = path.join(assetsDir, `${baseName}.ogg`);
 
-    execute: async (sock, message, args, ctx) => {
-        const { from } = ctx;
+    // make sure assets folder exists
+    if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir, { recursive: true });
 
-        if (!args.length) {
-            return ctx.reply(
-`🎙️ *Legacy MD Text To Speech*
-
-Usage:
-•.tts <text>
-•.tts <language> <text>
-
-Example:
-•.tts Hello everyone!
-•.tts sw Habari za leo?
-
-🌍 Supported Languages:
-en • fr • sw • ar • es • de • ja • zh • hi • pt
-
-Powered by *Legacy MD*`
-            );
+    const gtts = new gTTS(text, language);
+    
+    gtts.save(mp3Path, async function (err) {
+        if (err) {
+            console.log("TTS Error:", err);
+            await sock.sendMessage(chatId, { text: '❌ Error generating TTS audio.' });
+            return;
         }
-
-        let lang = 'en';
-        let text;
-
-        if (VOICES[args[0].toLowerCase()]) {
-            lang = VOICES[args[0].toLowerCase()];
-            text = args.slice(1).join(' ');
-        } else {
-            text = args.join(' ');
-        }
-
-        if (!text.trim()) {
-            return ctx.reply('❌ Please provide text to convert into speech.');
-        }
-
-        if (text.length > 200) {
-            return ctx.reply('❌ Maximum text length is 200 characters.');
-        }
-
-        const tmpFile = path.join(__dirname, `tts_${Date.now()}`);
-        const mp3Path = `${tmpFile}.mp3`;
-        const oggPath = `${tmpFile}.ogg`;
 
         try {
-            await ctx.react('🎤');
+            await sock.sendMessage(chatId, { react: { text: "🎤", key: message.key } });
 
-            const ttsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${lang}&q=${encodeURIComponent(text)}`;
+            // Convert to WhatsApp PTT format
+            await execAsync(`ffmpeg -y -i "${mp3Path}" -ar 48000 -ac 1 -c:a libopus -b:a 32k "${oggPath}"`);
 
-            const response = await axios.get(ttsUrl, {
-                responseType: 'arraybuffer',
-                timeout: 20000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0',
-                    'Referer': 'https://translate.google.com/',
-                }
-            });
-
-            fs.writeFileSync(mp3Path, response.data);
-
-            // Convert to ogg opus for WhatsApp PTT
-            await execAsync(`ffmpeg -i "${mp3Path}" -vn -ar 48000 -ac 2 -b:a 64k -f ogg "${oggPath}" -y`);
-
-            const audioBuffer = fs.readFileSync(oggPath);
-
-            await sock.sendMessage(from, {
-                audio: audioBuffer,
+            await sock.sendMessage(chatId, {
+                audio: { url: oggPath },
                 mimetype: 'audio/ogg; codecs=opus',
-                ptt: true
+                ptt: true // <-- this makes it a voice note
             }, { quoted: message });
 
-            await ctx.react('✅');
+            await sock.sendMessage(chatId, { react: { text: "✅", key: message.key } });
 
-        } catch (err) {
-            console.error(err);
-            await ctx.react('❌');
-            await ctx.reply(
-`❌ *Legacy MD TTS Error*
-
-Unable to generate speech.
-
-Reason:
-${err.message}
-
-Make sure ffmpeg is installed: apt install ffmpeg`
-            );
+        } catch (e) {
+            console.log("Send Error:", e);
+            await sock.sendMessage(chatId, { text: '❌ Error sending audio. Is ffmpeg installed?' });
         } finally {
             // cleanup
             if (fs.existsSync(mp3Path)) fs.unlinkSync(mp3Path);
             if (fs.existsSync(oggPath)) fs.unlinkSync(oggPath);
         }
-    }
-};
+    });
+}
+
+module.exports = ttsCommand;
