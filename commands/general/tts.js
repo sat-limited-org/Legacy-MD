@@ -27,15 +27,13 @@ module.exports = {
     permission: 'public',
     group: true,
     private: true,
-    category: 'ai',
+    category: 'general',
 
-    run: async (sock, message, args, ctx) => {
-        const { contextInfo } = ctx;
-        const jid = message.key.remoteJid;
+    execute: async (sock, message, args, ctx) => {
+        const { from } = ctx;
 
         if (!args.length) {
-            return sock.sendMessage(jid, {
-                text:
+            return ctx.reply(
 `🎙️ *Legacy MD Text To Speech*
 
 Usage:
@@ -49,9 +47,8 @@ Example:
 🌍 Supported Languages:
 en • fr • sw • ar • es • de • ja • zh • hi • pt
 
-Powered by *Legacy MD*`,
-                contextInfo
-            }, { quoted: message });
+Powered by *Legacy MD*`
+            );
         }
 
         let lang = 'en';
@@ -65,26 +62,15 @@ Powered by *Legacy MD*`,
         }
 
         if (!text.trim()) {
-            return sock.sendMessage(jid, {
-                text: '❌ Please provide text to convert into speech.',
-                contextInfo
-            }, { quoted: message });
+            return ctx.reply('❌ Please provide text to convert into speech.');
         }
 
         if (text.length > 200) {
-            return sock.sendMessage(jid, {
-                text: '❌ Maximum text length is 200 characters.',
-                contextInfo
-            }, { quoted: message });
+            return ctx.reply('❌ Maximum text length is 200 characters.');
         }
 
         try {
-            await sock.sendMessage(jid, {
-                react: {
-                    text: "🎤",
-                    key: message.key
-                }
-            });
+            await ctx.react('🎤');
 
             const ttsUrl =
                 `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${lang}&q=${encodeURIComponent(text)}`;
@@ -99,31 +85,20 @@ Powered by *Legacy MD*`,
                 }
             });
 
-            await sock.sendMessage(jid, {
+            await sock.sendMessage(from, {
                 audio: Buffer.from(response.data),
                 mimetype: 'audio/mpeg',
                 ptt: true
             }, { quoted: message });
 
-            await sock.sendMessage(jid, {
-                react: {
-                    text: "✅",
-                    key: message.key
-                }
-            });
+            await ctx.react('✅');
 
         } catch (err) {
             console.error(err);
 
-            await sock.sendMessage(jid, {
-                react: {
-                    text: "❌",
-                    key: message.key
-                }
-            });
+            await ctx.react('❌');
 
-            await sock.sendMessage(jid, {
-                text:
+            await ctx.reply(
 `❌ *Legacy MD TTS Error*
 
 Unable to generate speech.
@@ -131,9 +106,8 @@ Unable to generate speech.
 Reason:
 ${err.message}
 
-Please try again later.`,
-                contextInfo
-            }, { quoted: message });
+Please try again later.`
+            );
         }
     }
 };
