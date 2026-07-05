@@ -3,7 +3,7 @@
 const axios = require('axios');
 
 module.exports = {
-    name: ['bible'],
+    name: 'bible',
     description: 'Search Bible verses',
     usage: '.bible John 3:16',
     permission: 'public',
