@@ -6,26 +6,31 @@ const path = require('path');
 const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
 
 module.exports = {
-    name: ['deny', 'disallow'],
+    name: 'deny',
+    aliases: ['disallow', 'gcdenuy', 'gcd'],
     description: 'Remove this group from the allowed list.',
     usage: '.deny',
-    permission: 'owner',
-    group: true,
-    private: false,
+    ownerOnly: true,
+    groupOnly: true,
 
-    run: async (sock, message) => {
-        const from = message.key.remoteJid;
+    async execute(sock, msg, args, extra) {
+        const from = extra.from;
+        const sender = extra.sender;
 
         if (!from.endsWith('@g.us')) {
             return sock.sendMessage(from, {
                 text: '❌ This command can only be used in groups.'
-            });
+            }, { quoted: msg });
         }
 
         let groups = [];
 
         if (fs.existsSync(dbPath)) {
-            groups = JSON.parse(fs.readFileSync(dbPath));
+            try {
+                groups = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+            } catch (e) {
+                groups = [];
+            }
         }
 
         groups = groups.filter(id => id !== from);
@@ -34,6 +39,6 @@ module.exports = {
 
         await sock.sendMessage(from, {
             text: '🚫 This group is no longer allowed to use the bot.'
-        });
+        }, { quoted: msg });
     }
 };
