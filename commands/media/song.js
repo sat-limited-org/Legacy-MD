@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const APIs = require('../../utils/api');
+const mergeAudio = require('../../utils/mergeAudio');
 const { toAudio } = require('../../utils/converter');
 
 const AXIOS_DEFAULTS = {
