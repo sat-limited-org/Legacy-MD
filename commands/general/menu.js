@@ -30,11 +30,17 @@ module.exports = {
       const ownerNames = Array.isArray(config.ownerName) ? config.ownerName : [config.ownerName];
       const displayOwner = ownerNames[0] || config.ownerName || 'Bot Owner';
       
+      // Get current mode
+      const modeStatus = config.selfMode ? '🔒 Private Mode (Owner Only)' : '🌐 Public Mode (All Users)';
+      const autoReactStatus = config.autoReact ? '✅ Enabled' : '❌ Disabled';
+      
       let menuText = `╭━━『 *${config.botName}* 』━━╮\n\n`;
       menuText += `👋 Hello @${extra.sender.split('@')[0]}!\n\n`;
       menuText += `⚡ Prefix: ${config.prefix}\n`;
       menuText += `📦 Total Commands: ${commands.size}\n`;
-      menuText += `👑 Owner: ${displayOwner}\n\n`;
+      menuText += `👑 Owner: ${displayOwner}\n`;
+      menuText += `🎯 Mode: ${modeStatus}\n`;
+      menuText += `💬 AutoReact: ${autoReactStatus}\n\n`;
       
       // General Commands
       if (categories.general) {
@@ -135,27 +141,27 @@ if (categories.interaction) {
         menuText += `\n`;
       }
 
-       // Anime Commands
-       if (categories.anime) {
-        menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 👾 ANIME COMMAND\n`;
-        menuText += `┗━━━━━━━━━━━━━━━━━\n`;
-        categories.anime.forEach(cmd => {
-          menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
-        });
-        menuText += `\n`;
-      }
+        // Anime Commands
+        if (categories.anime) {
+         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+         menuText += `┃ 👾 ANIME COMMAND\n`;
+         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+         categories.anime.forEach(cmd => {
+           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+         });
+         menuText += `\n`;
+       }
 
-       // Textmaker Commands
-       if (categories.utility) {
-        menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-        menuText += `┃ 🖋️ TEXTMAKER COMMAND\n`;
-        menuText += `┗━━━━━━━━━━━━━━━━━\n`;
-        categories.textmaker.forEach(cmd => {
-          menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
-        });
-        menuText += `\n`;
-      }
+        // Textmaker Commands
+        if (categories.utility) {
+         menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+         menuText += `┃ 🖋️ TEXTMAKER COMMAND\n`;
+         menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+         categories.textmaker.forEach(cmd => {
+           menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+         });
+         menuText += `\n`;
+       }
       
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
       menuText += `💡 Type ${config.prefix}help <command> for more info\n`;
