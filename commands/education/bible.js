@@ -16,15 +16,14 @@ module.exports = {
         const { from } = ctx;
 
         if (!args.length) {
-            return sock.sendMessage(from, {
-                text:
+            return ctx.reply(
 `📖 *Bible Search*
 
 Example:
 .bible John 3:16
 .bible Genesis 1:1
 .bible Psalm 23`
-            });
+            );
         }
 
         try {
@@ -41,13 +40,11 @@ ${data.text.trim()}
 
 📚 Translation: ${data.translation_name}`;
 
-            await sock.sendMessage(from, { text });
+            await ctx.reply(text);
 
         } catch {
 
-            await sock.sendMessage(from, {
-                text: "❌ Verse not found."
-            });
+            await ctx.reply("❌ Verse not found.");
 
         }
     }
