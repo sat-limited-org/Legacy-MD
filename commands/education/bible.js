@@ -12,7 +12,7 @@ module.exports = {
     private: true,
     channel: true,
 
-    run: async (sock, message, args, ctx) => {
+    execute: async (sock, message, args, ctx) => {
         const { from } = ctx;
 
         if (!args.length) {
