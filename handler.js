@@ -407,7 +407,7 @@ const handleMessage = async (sock, msg) => {
           const prefixList = ['.', '/', '#'];
           if (prefixList.includes(text?.trim()[0])) {
             await sock.sendMessage(jid, {
-              react: { text: '⏳','🤖', key: msg.key }
+              react: { text: '⏳', key: msg.key }
             });
           }
         }
