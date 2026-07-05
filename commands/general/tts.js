@@ -20,7 +20,8 @@ const VOICES = {
 };
 
 module.exports = {
-    name: ['tts'],
+    name: 'tts',
+    aliases: ['speak','say','voice'],
     description: 'Convert text into realistic speech.',
     usage: '.tts <text>\n.tts <language> <text>',
     permission: 'public',
