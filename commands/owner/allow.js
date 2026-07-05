@@ -6,27 +6,31 @@ const path = require('path');
 const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
 
 module.exports = {
-    name: ['allow'],
-    aliases: ['gcallow','gca'],
+    name: 'allow',
+    aliases: ['gcallow', 'gca'],
     description: 'Allow this group to use the bot.',
     usage: '.allow',
-    permission: 'owner',
-    group: true,
-    private: false,
+    ownerOnly: true,
+    groupOnly: true,
 
-    run: async (sock, message) => {
-        const from = message.key.remoteJid;
+    async execute(sock, msg, args, extra) {
+        const from = extra.from;
+        const sender = extra.sender;
 
         if (!from.endsWith('@g.us')) {
             return sock.sendMessage(from, {
                 text: '❌ This command can only be used in groups.'
-            });
+            }, { quoted: msg });
         }
 
         let groups = [];
 
         if (fs.existsSync(dbPath)) {
-            groups = JSON.parse(fs.readFileSync(dbPath));
+            try {
+                groups = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
+            } catch (e) {
+                groups = [];
+            }
         }
 
         if (!groups.includes(from)) {
@@ -36,6 +40,6 @@ module.exports = {
 
         await sock.sendMessage(from, {
             text: '✅ This group has been allowed to use the bot.'
-        });
+        }, { quoted: msg });
     }
 };
