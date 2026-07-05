@@ -6,7 +6,7 @@ const path = require('path');
 const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
 
 module.exports = {
-    commands: ['deny', 'disallow'],
+    name: ['deny', 'disallow'],
     description: 'Remove this group from the allowed list.',
     usage: '.deny',
     permission: 'owner',
