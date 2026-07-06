@@ -5,6 +5,7 @@
 const gTTS = require('gtts');
 const fs = require('fs');
 const path = require('path');
+const config = require('../../config');
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const execAsync = promisify(exec);
