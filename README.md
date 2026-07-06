@@ -12,7 +12,7 @@
   </a> 
 </div> 
 
-<img src="../utils/bot-image.jpg">
+<img src="../../utils/bot-image.jpg">
 
 </div>
 
