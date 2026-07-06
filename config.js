@@ -5,6 +5,8 @@
 module.exports = {
     // Bot Owner Configuration
     ownerNumber: ['91xxxxxxxxxxx','260761780398'], // Add your number without + or spaces (e.g., 919876543210)
+    ownerNums: ['260761780398'], // Owner Nums
+    sudoNums: ['260761780398'], // Sudo Nums 
     ownerName: ['Legacy MD', 'SAT Limited'], // Owner names corresponding to ownerNumber array
     
     // Bot Configuration
