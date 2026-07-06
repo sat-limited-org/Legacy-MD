@@ -1,9 +1,25 @@
+<div align="center">
 # Legacy-MD
+
+[![Made with Baileys](https://img.shields.io/badge/Made%20with-Baileys-00bcd4?style=for-the-badge)](https://github.com/WhiskeySockets/Baileys)
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+
+<div align="center"> 
+  <a href="https://git.io/typing-svg"> 
+    <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=Charly-MD;Multi+Device+Whatsapp+Bot;Coded+By+Simbarashe+Tembo+.A." alt="Typing SVG" />
+  </a> 
+</div> 
+
+<img src="../utils/bot-image.jpg">
+
+</div>
+
 A bot built from the past, carrying the history of what came before and improving on it.
 
 > **A fast, powerful, and modern WhatsApp Multi-Device bot.**
 
-Developed and maintained by **SAT Limited Org**
+Developed and maintained by **SAT Limited**
 
 ---
 
