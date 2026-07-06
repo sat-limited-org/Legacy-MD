@@ -8,11 +8,11 @@
 
 <div align="center"> 
   <a href="https://git.io/typing-svg"> 
-    <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=Charly-MD;Multi+Device+Whatsapp+Bot;Coded+By+Simbarashe+Tembo+.A." alt="Typing SVG" />
+    <img src="https://readme-typing-svg.demolab.com?font=Ribeye&size=50&pause=1000&color=33ff00&center=true&width=910&height=100&lines=Legacy-MD;Multi+Device+Whatsapp+Bot;Coded+By+Simbarashe+Tembo+.A." alt="Typing SVG" />
   </a> 
 </div> 
 
-<img src="../../utils/bot-image.jpg">
+<img src="../../utils/bot_image.jpg">
 
 </div>
 
