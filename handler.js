@@ -384,6 +384,32 @@ const handleMessage = async (sock, msg) => {
     if (isSystemJid(from)) {
       return; // Silently ignore system messages
     }
+
+// Handle menu number reply
+if (global.menuSessions && global.menuSessions[sender]) {
+    const session = global.menuSessions[sender];
+    if (msg.quoted && msg.quoted.sender === sock.user.id && /^[1-9]$/.test(text)) {
+        const num = parseInt(text);
+        const cat = session.menuMap[num];
+        if (cat) {
+            let replyText = `┏━━━『 COMMANDS 』━━━┓\n\n`;
+            const cats = Array.isArray(cat)? cat : [cat];
+            cats.forEach(c => {
+                if (session.categories[c]) {
+                    replyText += `┃ ${c.toUpperCase()}\n`;
+                    session.categories[c].forEach(cmd => {
+                        replyText += `│ ➜ ${session.prefix}${cmd.name}\n`;
+                    });
+                    replyText += `\n`;
+                }
+            });
+            replyText += `┗━━━━━━━━━━┛`;
+            await sock.sendMessage(from, { text: replyText }, { quoted: msg });
+            delete global.menuSessions[sender]; // clear after use
+            return;
+        }
+    }
+}
     
     // Auto-React System
     try {
