@@ -7,7 +7,7 @@ const { exec } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const webp = require('node-webpmux');
-const crypto = require('crypto');
+const config = require('../../config'); // <-- you were missing this
 
 async function toSticker(buffer) {
     const tmp = path.join(process.cwd(), 'tmp');
@@ -32,6 +32,23 @@ async function toSticker(buffer) {
     return final;
 }
 
+// Try multiple APIs
+async function getHugImage() {
+    const apis = [
+        'https://api.waifu.pics/sfw/hug',
+        'https://api.otaku-api.com/v1/hug',
+        'https://nekos.best/api/v2/hug'
+    ];
+    
+    for(let url of apis) {
+        try {
+            const res = await axios.get(url, { timeout: 5000 });
+            return res.data.url || res.data.results?.[0]?.url; // nekos.best format
+        } catch(e) { continue; }
+    }
+    throw new Error('All hug APIs are down');
+}
+
 module.exports = {
     name: 'hug',
     aliases: ['hugging'],
@@ -43,9 +60,7 @@ module.exports = {
         try {
             await sock.sendMessage(from, { react: { text: "🫂", key: msg.key } });
             
-            // NEW WORKING API
-            const res = await axios.get('https://api.waifu.pics/sfw/hug');
-            const link = res.data.url;
+            const link = await getHugImage(); // <-- uses fallback
             const resp = await axios.get(link, { responseType: 'arraybuffer' });
             const sticker = await toSticker(Buffer.from(resp.data));
             
@@ -57,7 +72,7 @@ module.exports = {
             await sock.sendMessage(from, { text: caption, mentions: [mentioned, sender] });
         } catch (err) {
             console.log(err);
-            await extra.reply(`❌ Error: ${err.message}`);
+            await extra.reply(`❌ Error: Can't fetch hug image. Check internet/DNS\n${err.message}`);
         }
     }
 };
