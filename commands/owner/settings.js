@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { owner } = require('../../config.js'); // pull owner from config
+const { owner, sudo } = require('../../config.js'); // pull owner + sudo from config
 
 function readJsonSafe(filePath, fallback) {
     try {
@@ -11,10 +11,21 @@ function readJsonSafe(filePath, fallback) {
     }
 }
 
-const isOwnerOrSudo = (sender, botOwner) => {
+const isAllowed = (sender, botNumber) => {
     const senderNum = sender.split('@')[0];
-    const ownerNums = Array.isArray(botOwner)? botOwner : [botOwner];
-    return ownerNums.some(num => num.split('@')[0] === senderNum);
+    const ownerNums = Array.isArray(owner)? owner : [owner];
+    const sudoNums = Array.isArray(sudo)? sudo : [sudo].filter(Boolean);
+
+    // 1. Bot maker / owner
+    // 2. Sudo members
+    // 3. The bot itself
+    const allowed = [
+       ...ownerNums.map(n => n.split('@')[0]),
+       ...sudoNums.map(n => n.split('@')[0]),
+        botNumber.split('@')[0]
+    ];
+
+    return allowed.includes(senderNum);
 };
 
 module.exports = {
@@ -27,11 +38,12 @@ module.exports = {
     async execute(sock, msg, args, extra) {
         const { from } = extra;
         const senderId = msg.key.participant || msg.key.remoteJid;
+        const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net'; // get bot's own jid
 
         try {
-            // Only owner/sudo can use
-            if (!msg.key.fromMe &&!isOwnerOrSudo(senderId, owner)) {
-                return await sock.sendMessage(from, { text: '❌ Only bot owner can use this command!' }, { quoted: msg });
+            // Only owner/sudo/bot can use
+            if (!msg.key.fromMe &&!isAllowed(senderId, botNumber)) {
+                return await sock.sendMessage(from, { text: '❌ Only bot owner, sudo members, or bot can use this command!' }, { quoted: msg });
             }
 
             const isGroup = from.endsWith('@g.us');
