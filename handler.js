@@ -658,6 +658,13 @@ const handleMessage = async (sock, msg) => {
       }
     }
     
+    // Anti-bad word protection 
+for (const command of commands) {
+    if (command.check) {
+        await command.check(sock, msg);
+    }
+}
+
     // Anti-group mention protection (check BEFORE prefix check, as these are non-command messages)
     if (isGroup) {
       // Debug logging to confirm we're trying to call the handler
