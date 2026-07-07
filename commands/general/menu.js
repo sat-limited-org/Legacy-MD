@@ -176,7 +176,6 @@ if (categories.interaction) {
       
       menuText += `╰━━━━━━━━━━━━━━━━━\n\n`;
       menuText += `💡 Type ${config.prefix}help <command> for more info\n`;
-      menuText += `🌟 Bot Version: 1.0.0\n`;
       menuText += `> Powered by *SAT Limited*\n`;
       
       // Send menu with image
