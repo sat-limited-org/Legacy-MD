@@ -24,10 +24,11 @@ function saveSudo(data) {
 }
 
 module.exports = {
-    name: ["sudo"],
+    name: "sudo",
+    aliases: ["sudolist"],
     description: "Manage bot sudo users",
     usage: ".sudo add/remove/list @user",
-    permission: "owner",
+    ownerOnly: true,
     category: "owner",
 
     execute: async (sock, message, args, ctx) => {
