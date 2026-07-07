@@ -191,13 +191,13 @@ async function startBot() {
   const sessionFolder = `./${config.sessionName}`;
   const sessionFile = path.join(sessionFolder, 'creds.json');
 
-  // Check if sessionID is provided and process KnightBot! format session
-  if (config.sessionID && config.sessionID.startsWith('KnightBot!')) {
+  // Check if sessionID is provided and process Legacy! format session
+  if (config.sessionID && config.sessionID.startsWith('Legacy!')) {
     try {
       const [header, b64data] = config.sessionID.split('!');
 
-      if (header !== 'KnightBot' || !b64data) {
-        throw new Error("❌ Invalid session format. Expected 'KnightBot!.....'");
+      if (header !== 'Legacy' || !b64data) {
+        throw new Error("❌ Invalid session format. Expected 'Legacy!.....'");
       }
 
       const cleanB64 = b64data.replace('...', '');
