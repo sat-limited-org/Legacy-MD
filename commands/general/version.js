@@ -25,7 +25,7 @@ module.exports = {
         const seconds = Math.floor(uptime % 60);
 
         const text =
-`╭━━〔 🚀 LEGACY MD 〕━━⬣
+`╭━━〔 *🚀 LEGACY MD* 〕━━⬣
 ┃
 ┃ 🤖 Bot Name : ${config.botName || "Legacy MD"}
 ┃ 🔖 Version  : ${config.bot_version || "2.0.0"}
@@ -39,7 +39,7 @@ module.exports = {
 ┃ https://github.com/sat-limited-org/Legacy-MD
 ┃
 ┃ 📢 WhatsApp Channel:
-┃ ${config.channel || "Not Set"}
+┃ ${config.channel || "https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n"}
 ┃
 ┣━━〔 ⚙️ SYSTEM 〕━━⬣
 ┃ 🟢 NodeJS : ${process.version}
@@ -48,7 +48,7 @@ module.exports = {
 ┃
 ╰━━━━━━━━━━━━━━━━━━━━⬣
 
-✨ Stay legendary with Legacy MD`;
+> *✨ Stay legendary with Legacy MD*`;
 
         await reply(text);
     }
