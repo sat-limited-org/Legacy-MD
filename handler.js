@@ -8,6 +8,15 @@ const { loadCommands } = require('./utils/commandLoader');
 const { addMessage } = require('./utils/groupstats');
 const { jidDecode, jidEncode } = require('@whiskeysockets/baileys');
 const fs = require('fs');
+
+function isSudo(sender) {
+    try {
+        const sudo = JSON.parse(fs.readFileSync("./database/sudo.json"));
+        return sudo.includes(sender.split("@")[0]);
+    } catch {
+        return false;
+    }
+}
 const path = require('path');
 const axios = require('axios');
 
