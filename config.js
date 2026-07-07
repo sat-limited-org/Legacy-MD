@@ -12,6 +12,7 @@ module.exports = {
     prefix: '.',
     owner: 'SAT Limited',
     bot_version: '2.0.0',
+    channel: 'https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n'
     sessionName: 'session',
     sessionID: process.env.SESSION_ID || '',
     newsletterJid:
