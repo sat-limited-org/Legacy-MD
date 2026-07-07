@@ -22,14 +22,16 @@ function saveData(data) {
     fs.writeFileSync(FILE, JSON.stringify(data, null, 2));
 }
 
+
 module.exports = {
+
     name: "antibadword",
     aliases: ["antibad", "badword"],
     description: "Manage anti bad word protection",
-    usage: ".antibadword on/off/add/remove/list",
     category: "group",
     groupOnly: true,
     adminOnly: true,
+
 
     async execute(sock, msg, args, extra) {
 
@@ -37,54 +39,41 @@ module.exports = {
 
         const groupId = msg.key.remoteJid;
 
-        const data = loadData();
+        const db = loadData();
 
-        if (!data[groupId]) {
-            data[groupId] = {
+        if (!db[groupId]) {
+            db[groupId] = {
                 enabled: false,
                 words: []
             };
         }
 
 
-        if (!args[0]) {
+        const action = args[0]?.toLowerCase();
+
+
+        if (!action) {
             return reply(
-`╭━━〔 🚫 ANTI BAD WORD 〕━━⬣
-┃
-┃ Usage:
-┃ .antibadword on
-┃ .antibadword off
-┃ .antibadword add <word>
-┃ .antibadword remove <word>
-┃ .antibadword list
-┃
-╰━━━━━━━━━━━━━━━━━━━━⬣`
+`.antibadword on
+.antibadword off
+.antibadword add <word>
+.antibadword remove <word>
+.antibadword list`
             );
         }
 
 
-        const action = args[0].toLowerCase();
-
-
         if (action === "on") {
-
-            data[groupId].enabled = true;
-            saveData(data);
-
-            return reply(
-                "✅ Anti Bad Word has been enabled."
-            );
+            db[groupId].enabled = true;
+            saveData(db);
+            return reply("✅ Anti Bad Word enabled.");
         }
 
 
         if (action === "off") {
-
-            data[groupId].enabled = false;
-            saveData(data);
-
-            return reply(
-                "✅ Anti Bad Word has been disabled."
-            );
+            db[groupId].enabled = false;
+            saveData(db);
+            return reply("✅ Anti Bad Word disabled.");
         }
 
 
@@ -93,16 +82,13 @@ module.exports = {
             const word = args[1]?.toLowerCase();
 
             if (!word)
-                return reply("❌ Provide a word.");
+                return reply("❌ Enter a word.");
 
-            if (data[groupId].words.includes(word))
-                return reply("⚠️ Word already exists.");
-
-            data[groupId].words.push(word);
-            saveData(data);
+            db[groupId].words.push(word);
+            saveData(db);
 
             return reply(
-                `✅ Added "${word}" to bad word list.`
+                `✅ Added: ${word}`
             );
         }
 
@@ -111,41 +97,76 @@ module.exports = {
 
             const word = args[1]?.toLowerCase();
 
-            if (!word)
-                return reply("❌ Provide a word.");
+            db[groupId].words =
+            db[groupId].words.filter(
+                x => x !== word
+            );
 
-            data[groupId].words =
-                data[groupId].words.filter(
-                    w => w !== word
-                );
-
-            saveData(data);
+            saveData(db);
 
             return reply(
-                `✅ Removed "${word}" from bad word list.`
+                `✅ Removed: ${word}`
             );
         }
 
 
         if (action === "list") {
 
-            const words = data[groupId].words;
-
-            if (!words.length)
-                return reply(
-                    "📃 No bad words added."
-                );
-
             return reply(
-`🚫 *Bad Words List*
-
-${words.map((w,i)=>`${i+1}. ${w}`).join("\n")}`
+                db[groupId].words.length
+                ? db[groupId].words.join("\n")
+                : "No bad words added."
             );
         }
+    },
 
 
-        return reply(
-            "❌ Invalid option."
+    // Handler calls this on every message
+    async check(sock, msg) {
+
+        const groupId = msg.key.remoteJid;
+
+        if (!groupId.endsWith("@g.us"))
+            return;
+
+
+        const db = loadData();
+
+        const settings = db[groupId];
+
+        if (!settings?.enabled)
+            return;
+
+
+        const text =
+            msg.message?.conversation ||
+            msg.message?.extendedTextMessage?.text ||
+            "";
+
+
+        const found = settings.words.find(
+            word => text.toLowerCase().includes(word)
         );
+
+
+        if (found) {
+
+            await sock.sendMessage(
+                groupId,
+                {
+                    text:
+                    "🚫 Bad words are not allowed here."
+                },
+                { quoted: msg }
+            );
+
+
+            await sock.sendMessage(
+                groupId,
+                {
+                    delete: msg.key
+                }
+            );
+        }
     }
 };
