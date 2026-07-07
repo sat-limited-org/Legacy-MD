@@ -1,118 +1,159 @@
-const fs = require('fs');
-const path = require('path');
-const { owner, sudo } = require('../../config.js'); // pull owner + sudo from config
+/**
+ * Settings Command - Legacy MD Control Dashboard
+ */
 
-function readJsonSafe(filePath, fallback) {
+"use strict";
+
+const fs = require("fs");
+const os = require("os");
+const config = require("../../config");
+
+const DATA = "./data";
+
+function readJsonSafe(file, fallback) {
     try {
-        const txt = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(txt);
-    } catch (_) {
+        return JSON.parse(fs.readFileSync(file, "utf8"));
+    } catch {
         return fallback;
     }
 }
 
-const isAllowed = (sender, botNumber) => {
-    const senderNum = sender.split('@')[0];
-    const ownerNums = Array.isArray(owner)? owner : [owner];
-    const sudoNums = Array.isArray(sudo)? sudo : [sudo].filter(Boolean);
+function formatUptime(seconds) {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
 
-    // 1. Bot maker / owner
-    // 2. Sudo members
-    // 3. The bot itself
-    const allowed = [
-       ...ownerNums.map(n => n.split('@')[0]),
-       ...sudoNums.map(n => n.split('@')[0]),
-        botNumber.split('@')[0]
-    ];
-
-    return allowed.includes(senderNum);
-};
+    return `${h}h ${m}m ${s}s`;
+}
 
 module.exports = {
-    name: 'settings',
-    aliases: ['setting', 'botsettings'],
-    category: 'owner',
-    description: 'Show bot and group settings',
-    usage: '.settings',
+    name: "settings",
+    aliases: ["setting", "config"],
+    description: "View Legacy MD bot settings",
+    usage: ".settings",
+    category: "owner",
+    ownerOnly: true,
 
     async execute(sock, msg, args, extra) {
-        const { from } = extra;
-        const senderId = msg.key.participant || msg.key.remoteJid;
-        const botNumber = sock.user.id.split(':')[0] + '@s.whatsapp.net'; // get bot's own jid
+
+        const { reply } = extra;
 
         try {
-            // Only owner/sudo/bot can use
-            if (!msg.key.fromMe &&!isAllowed(senderId, botNumber)) {
-                return await sock.sendMessage(from, { text: '❌ Only bot owner, sudo members, or bot can use this command!' }, { quoted: msg });
-            }
 
-            const isGroup = from.endsWith('@g.us');
-            const dataDir = path.join(process.cwd(), 'data');
+            const mode = readJsonSafe(
+                `${DATA}/messageCount.json`,
+                { isPublic: true }
+            );
 
-            const mode = readJsonSafe(`${dataDir}/messageCount.json`, { isPublic: true });
-            const autoStatus = readJsonSafe(`${dataDir}/autoStatus.json`, { enabled: false });
-            const autoread = readJsonSafe(`${dataDir}/autoread.json`, { enabled: false });
-            const autotyping = readJsonSafe(`${dataDir}/autotyping.json`, { enabled: false });
-            const pmblocker = readJsonSafe(`${dataDir}/pmblocker.json`, { enabled: false });
-            const anticall = readJsonSafe(`${dataDir}/anticall.json`, { enabled: false });
-            const userGroupData = readJsonSafe(`${dataDir}/userGroupData.json`, {
-                antilink: {}, antibadword: {}, welcome: {}, goodbye: {}, chatbot: {}, antitag: {}, autoReaction: false
-            });
+            const autoStatus = readJsonSafe(
+                `${DATA}/autoStatus.json`,
+                { enabled:false }
+            );
 
-            const autoReaction = Boolean(userGroupData.autoReaction);
+            const autoread = readJsonSafe(
+                `${DATA}/autoread.json`,
+                { enabled:false }
+            );
 
-            // Per-group features
-            const groupId = isGroup? from : null;
-            const antilinkOn = groupId? Boolean(userGroupData.antilink?.[groupId]) : false;
-            const antibadwordOn = groupId? Boolean(userGroupData.antibadword?.[groupId]) : false;
-            const welcomeOn = groupId? Boolean(userGroupData.welcome?.[groupId]) : false;
-            const goodbyeOn = groupId? Boolean(userGroupData.goodbye?.[groupId]) : false;
-            const chatbotOn = groupId? Boolean(userGroupData.chatbot?.[groupId]) : false;
-            const antitagCfg = groupId? userGroupData.antitag?.[groupId] : null;
+            const autotyping = readJsonSafe(
+                `${DATA}/autotyping.json`,
+                { enabled:false }
+            );
 
-            const lines = [];
-            lines.push('*BOT SETTINGS*');
-            lines.push('');
-            lines.push(`• Mode: ${mode.isPublic? 'Public' : 'Private'}`);
-            lines.push(`• Auto Status: ${autoStatus.enabled? 'ON' : 'OFF'}`);
-            lines.push(`• Autoread: ${autoread.enabled? 'ON' : 'OFF'}`);
-            lines.push(`• Autotyping: ${autotyping.enabled? 'ON' : 'OFF'}`);
-            lines.push(`• PM Blocker: ${pmblocker.enabled? 'ON' : 'OFF'}`);
-            lines.push(`• Anticall: ${anticall.enabled? 'ON' : 'OFF'}`);
-            lines.push(`• Auto Reaction: ${autoReaction? 'ON' : 'OFF'}`);
+            const pmblocker = readJsonSafe(
+                `${DATA}/pmblocker.json`,
+                { enabled:false }
+            );
 
-            if (groupId) {
-                lines.push('');
-                lines.push('*GROUP SETTINGS*');
-                if (antilinkOn) {
-                    const al = userGroupData.antilink[groupId];
-                    lines.push(`• Antilink: ON (action: ${al.action || 'delete'})`);
-                } else {
-                    lines.push('• Antilink: OFF');
+            const anticall = readJsonSafe(
+                `${DATA}/anticall.json`,
+                { enabled:false }
+            );
+
+
+            const groups = readJsonSafe(
+                `${DATA}/userGroupData.json`,
+                {
+                    antilink:{},
+                    antibadword:{},
+                    welcome:{},
+                    goodbye:{},
+                    chatbot:{},
+                    antitag:{}
                 }
-                if (antibadwordOn) {
-                    const ab = userGroupData.antibadword[groupId];
-                    lines.push(`• Antibadword: ON (action: ${ab.action || 'delete'})`);
-                } else {
-                    lines.push('• Antibadword: OFF');
-                }
-                lines.push(`• Welcome: ${welcomeOn? 'ON' : 'OFF'}`);
-                lines.push(`• Goodbye: ${goodbyeOn? 'ON' : 'OFF'}`);
-                lines.push(`• Chatbot: ${chatbotOn? 'ON' : 'OFF'}`);
-                if (antitagCfg?.enabled) {
-                    lines.push(`• Antitag: ON (action: ${antitagCfg.action || 'delete'})`);
-                } else {
-                    lines.push('• Antitag: OFF');
-                }
-            } else {
-                lines.push('');
-                lines.push('Note: Per-group settings will be shown when used inside a group.');
-            }
+            );
 
-            await sock.sendMessage(from, { text: lines.join('\n') }, { quoted: msg });
-        } catch (error) {
-            console.error('Error in settings command:', error);
-            await sock.sendMessage(from, { text: '❌ Failed to read settings.' }, { quoted: msg });
+
+            const sender =
+                msg.key.participant ||
+                msg.key.remoteJid;
+
+
+            const isGroup =
+                msg.key.remoteJid.endsWith("@g.us");
+
+
+            const groupId = isGroup
+                ? msg.key.remoteJid
+                : null;
+
+
+            const text = `
+╭━━〔 ⚙️ LEGACY MD SETTINGS 〕━━⬣
+┃
+┃ 🤖 Bot Name : ${config.BOT_NAME || "Legacy MD"}
+┃ 🔖 Version  : ${config.bot_version || "2.0.0"}
+┃ 📌 Prefix   : ${config.PREFIX || "."}
+┃ 🌍 Mode     : ${mode.isPublic ? "Public" : "Private"}
+┃ 📢 Newsletter : Enabled
+┃
+┣━━〔 🤖 BOT SETTINGS 〕━━⬣
+┃ 🎵 Auto Read      : ${autoread.enabled ? "ON":"OFF"}
+┃ 📝 Auto Status    : ${autoStatus.enabled ? "ON":"OFF"}
+┃ ⌨️ Auto Typing    : ${autotyping.enabled ? "ON":"OFF"}
+┃ 🚫 PM Blocker     : ${pmblocker.enabled ? "ON":"OFF"}
+┃ 📵 Anti Call      : ${anticall.enabled ? "ON":"OFF"}
+┃ 😀 Auto Reaction  : ${groups.autoReaction ? "ON":"OFF"}
+┃
+┣━━〔 📊 SYSTEM INFO 〕━━⬣
+┃ ⚡ Uptime     : ${formatUptime(process.uptime())}
+┃ 💾 RAM Usage  : ${Math.round(process.memoryUsage().rss / 1024 / 1024)} MB
+┃ 🧠 Platform   : ${os.platform()}
+┃ 📦 Commands   : Loaded
+┃ 🟢 Database   : Connected
+┃
+┣━━〔 👥 GROUP SETTINGS 〕━━⬣
+┃ 🔗 Anti Link      : ${
+    groupId && groups.antilink[groupId] ? "ON":"OFF"
+}
+┃ 🚫 Anti Bad Word  : ${
+    groupId && groups.antibadword[groupId] ? "ON":"OFF"
+}
+┃ 👋 Welcome        : ${
+    groupId && groups.welcome[groupId] ? "ON":"OFF"
+}
+┃ 👋 Goodbye        : ${
+    groupId && groups.goodbye[groupId] ? "ON":"OFF"
+}
+┃ 🤖 Chatbot        : ${
+    groupId && groups.chatbot[groupId] ? "ON":"OFF"
+}
+┃ 📛 Anti Tag       : ${
+    groupId && groups.antitag[groupId] ? "ON":"OFF"
+}
+┃
+╰━━━━━━━━━━━━━━━━━━━━⬣
+`;
+
+            await reply(text);
+
+        } catch (err) {
+
+            console.error("Settings Error:", err);
+
+            await reply(
+                "❌ Failed to load settings."
+            );
         }
     }
 };
