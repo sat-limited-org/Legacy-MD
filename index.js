@@ -211,10 +211,10 @@ async function startBot() {
 
       // Write decompressed session data to creds.json
       fs.writeFileSync(sessionFile, decompressedData, 'utf8');
-      console.log('📡 Session : 🔑 Retrieved from KnightBot Session');
+      console.log('📡 Session : 🔑 Retrieved from SAT Limited Session');
 
     } catch (e) {
-      console.error('📡 Session : ❌ Error processing KnightBot session:', e.message);
+      console.error('📡 Session : ❌ Error processing SAT Limited session:', e.message);
       // Continue with normal QR flow if session processing fails
     }
   }
