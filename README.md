@@ -54,6 +54,16 @@ Today, **Legacy MD** represents the next stage of that journey—bringing togeth
 
 To build a fast, reliable, and community-driven WhatsApp bot while preserving the lessons learned from previous generations.
 
+## ⚡ Join Us 
+
+<div align="center">
+  <a
+
+href="https://chat.whatsapp.com/Iq349dQeg0fA6XepNuIe8T">
+    <img src="https://img.shields.io/badge/Join%20WhatsApp%20Group-25D366?style=for-the-badge&logo=whatsapp&logoColor=white" alt="Join WhatsApp"/>
+  </a>
+</div>
+
 ## 📦 Installation
 
 ```bash
