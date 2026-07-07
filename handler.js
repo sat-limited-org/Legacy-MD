@@ -7,13 +7,17 @@ const database = require('./database');
 const { loadCommands } = require('./utils/commandLoader');
 const { addMessage } = require('./utils/groupstats');
 const { jidDecode, jidEncode } = require('@whiskeysockets/baileys');
-const fs = require('fs');
+const fs = require("fs");
 
 function isSudo(sender) {
     try {
-        const sudo = JSON.parse(fs.readFileSync("./database/sudo.json"));
-        return sudo.includes(sender.split("@")[0]);
-    } catch {
+        const sudo = JSON.parse(
+            fs.readFileSync("./database/sudo.json", "utf8")
+        );
+
+        const number = sender.split("@")[0];
+        return sudo.includes(number);
+    } catch (err) {
         return false;
     }
 }
