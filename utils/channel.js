@@ -1,16 +1,23 @@
 'use strict';
 
 /**
- * Legacy MD Channel Utilities
- * Wrapper around Baileys Newsletter API
+ * Legacy MD - Channel Utilities
+ * WhatsApp Newsletter Wrapper
  */
 
-function extractChannel(url) {
-    if (!url) throw new Error("Channel URL is required.");
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 
-    const match = url.match(
-        /(?:https?:\/\/)?(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9]+)(?:\/(\d+))?/i
-    );
+/**
+ * Parse a WhatsApp Channel URL
+ */
+function extractChannel(input) {
+    if (!input) throw new Error("Channel URL is required.");
+
+    const regex = /(?:https?:\/\/)?(?:www\.)?whatsapp\.com\/channel\/([A-Za-z0-9]+)(?:\/(\d+))?/i;
+
+    const match = input.match(regex);
 
     if (!match)
         throw new Error("Invalid WhatsApp Channel URL.");
@@ -21,55 +28,73 @@ function extractChannel(url) {
     };
 }
 
-async function getChannelMetadata(sock, urlOrInvite) {
+/**
+ * Accept URL or invite code
+ */
+function parseChannelLink(input) {
 
-    const invite =
-        urlOrInvite.includes("whatsapp.com")
-            ? extractChannel(urlOrInvite).inviteCode
-            : urlOrInvite;
+    if (input.includes("whatsapp.com")) {
+        return extractChannel(input);
+    }
+
+    return {
+        inviteCode: input,
+        postId: null
+    };
+}
+
+/**
+ * Get Metadata
+ */
+async function getChannelMetadata(sock, input) {
+
+    const { inviteCode } = parseChannelLink(input);
 
     return await sock.newsletterMetadata(
         "invite",
-        invite
+        inviteCode
     );
 }
 
-async function followChannel(sock, urlOrInvite) {
+/**
+ * Follow
+ */
+async function followChannel(sock, input) {
 
-    const metadata =
-        await getChannelMetadata(sock, urlOrInvite);
+    const metadata = await getChannelMetadata(sock, input);
 
     await sock.newsletterFollow(metadata.id);
 
     return metadata;
 }
 
-async function unfollowChannel(sock, urlOrInvite) {
+/**
+ * Unfollow
+ */
+async function unfollowChannel(sock, input) {
 
-    const metadata =
-        await getChannelMetadata(sock, urlOrInvite);
+    const metadata = await getChannelMetadata(sock, input);
 
     await sock.newsletterUnfollow(metadata.id);
 
     return metadata;
 }
 
+/**
+ * React once
+ */
 async function reactToPost(
     sock,
     url,
     emoji = "❤️"
 ) {
 
-    const { inviteCode, postId } =
-        extractChannel(url);
+    const { inviteCode, postId } = extractChannel(url);
 
     if (!postId)
-        throw new Error(
-            "Post ID missing from URL."
-        );
+        throw new Error("Missing Post ID.");
 
-    const metadata =
-        await getChannelMetadata(sock, inviteCode);
+    const metadata = await getChannelMetadata(sock, inviteCode);
 
     await sock.newsletterReactMessage(
         metadata.id,
@@ -84,64 +109,88 @@ async function reactToPost(
     };
 }
 
-async function fetchPosts(
+/**
+ * React with many emojis
+ */
+async function reactMultiple(
     sock,
-    urlOrInvite,
-    count = 10
+    url,
+    emojis = ["❤️","🔥","👍"]
 ) {
 
-    const metadata =
-        await getChannelMetadata(sock, urlOrInvite);
+    const results = [];
+
+    for (const emoji of emojis) {
+
+        const result = await reactToPost(
+            sock,
+            url,
+            emoji
+        );
+
+        results.push(result);
+
+        await sleep(
+            Math.floor(Math.random() * 1200) + 700
+        );
+
+    }
+
+    return results;
+}
+
+/**
+ * Fetch Posts
+ */
+async function fetchPosts(
+    sock,
+    input,
+    limit = 10
+) {
+
+    const metadata = await getChannelMetadata(sock, input);
 
     return await sock.newsletterFetchMessages(
         metadata.id,
-        count
+        limit
     );
 }
 
-async function createChannel(
+/**
+ * Fetch Latest Post
+ */
+async function fetchLatestPost(
     sock,
-    name,
-    description = ""
+    input
 ) {
 
-    return await sock.newsletterCreate({
-        name,
-        description
-    });
+    const posts = await fetchPosts(
+        sock,
+        input,
+        1
+    );
+
+    return posts?.messages?.[0] || posts?.[0] || null;
 }
 
 module.exports = {
 
-    extractChannel()
-parseChannelLink()
+    extractChannel,
 
-getChannelMetadata()
+    parseChannelLink,
 
-followChannel()
-unfollowChannel()
+    getChannelMetadata,
 
-reactToPost()
-reactMultiple()
+    followChannel,
 
-fetchPosts()
-fetchLatestPost()
+    unfollowChannel,
 
-createChannel()
-deleteChannel()
+    reactToPost,
 
-muteChannel()
-unmuteChannel()
+    reactMultiple,
 
-renameChannel()
-updateDescription()
+    fetchPosts,
 
-updatePicture()
-removePicture()
-
-getSubscribers()
-getAdminCount()
-
-changeOwner()
+    fetchLatestPost
 
 };
