@@ -140,6 +140,17 @@ if (categories.interaction) {
   });
   menuText += `\n`;
 }
+
+      // Channel Commands
+if (categories.channel) {
+  menuText += `┏━━━━━━━━━━━━━━━━━\n`;
+  menuText += `┃ 🤖 CHANNEL MANAGEMENT COMMANDS\n`;
+  menuText += `┗━━━━━━━━━━━━━━━━━\n`;
+  categories.channel.forEach(cmd => {
+    menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
+  });
+  menuText += `\n`;
+}
       
       // Utility Commands
       if (categories.utility) {
