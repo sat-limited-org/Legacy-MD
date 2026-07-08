@@ -8,7 +8,7 @@ const { newsletterCtx } = require("../../utils/context");
 module.exports = {
     name: "chreact",
     aliases: ["reactchannel"],
-    category: "owner",
+    category: "channel",
     description: "React to a WhatsApp Channel post.",
     usage: ".chreact <channel_url> [emoji emoji ...]",
     owner: true,
