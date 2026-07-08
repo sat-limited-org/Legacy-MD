@@ -113,18 +113,35 @@ async function createChannel(
 
 module.exports = {
 
-    extractChannel,
+    extractChannel()
+parseChannelLink()
 
-    getChannelMetadata,
+getChannelMetadata()
 
-    followChannel,
+followChannel()
+unfollowChannel()
 
-    unfollowChannel,
+reactToPost()
+reactMultiple()
 
-    reactToPost,
+fetchPosts()
+fetchLatestPost()
 
-    fetchPosts,
+createChannel()
+deleteChannel()
 
-    createChannel
+muteChannel()
+unmuteChannel()
+
+renameChannel()
+updateDescription()
+
+updatePicture()
+removePicture()
+
+getSubscribers()
+getAdminCount()
+
+changeOwner()
 
 };
