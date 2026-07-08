@@ -1,59 +1,96 @@
 'use strict';
 
-const {
-    getChannelMetadata
-} = require("../../utils/channel");
+/**
+ * Channel Info Command
+ * Get information about a WhatsApp Channel
+ */
 
-const { newsletterCtx } = require("../../utils/context");
+const { getChannelMetadata } = require('../../utils/channel');
+const { newsletterCtx } = require('../../utils/context');
 
 module.exports = {
-    name: "chinfo",
-    aliases: ["channelinfo"],
-    category: "channel",
-    description: "Get information about a WhatsApp Channel.",
-    usage: ".chinfo <channel_url>",
+    name: 'chinfo',
+    aliases: ['channelinfo', 'newsletterinfo'],
+    category: 'channel',
+    description: 'Get information about a WhatsApp Channel.',
+    usage: '.chinfo <channel_url>',
 
     async execute(sock, msg, args) {
         try {
 
-            if (!args[0]) {
+            if (!args.length) {
                 return await sock.sendMessage(
                     msg.key.remoteJid,
                     {
-                        text: "❌ Please provide a channel URL."
+                        text:
+`❌ Please provide a WhatsApp Channel URL.
+
+Example:
+.chinfo https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n`
                     },
-                    { quoted: msg }
+                    {
+                        quoted: msg
+                    }
                 );
             }
 
-            const info = await getChannelMetadata(sock, args[0]);
+            const metadata = await getChannelMetadata(
+                sock,
+                args[0]
+            );
+
+            const text = `╭━━〔 *CHANNEL INFO* 〕━━⬣
+
+📢 *Name:*
+${metadata.name || "Unknown"}
+
+🆔 *Channel ID:*
+${metadata.id}
+
+👥 *Subscribers:*
+${metadata.subscribers ?? "Unknown"}
+
+📝 *Description:*
+${metadata.description || "No description."}
+
+🔇 *Muted:*
+${metadata.mute ? "Yes" : "No"}
+
+👤 *Owner:*
+${metadata.owner || "Unknown"}
+
+╰━━━━━━━━━━━━━━⬣`;
+
+            await sock.sendMessage(
+                msg.key.remoteJid,
+                {
+                    text,
+                    contextInfo: newsletterCtx()
+                },
+                {
+                    quoted: msg
+                }
+            );
+
+        } catch (err) {
+
+            console.error("CHINFO ERROR:", err);
 
             await sock.sendMessage(
                 msg.key.remoteJid,
                 {
                     text:
-`📢 ${info.name}
+`❌ Failed to fetch channel information.
 
-🆔 ${info.id}
-
-👥 Followers: ${info.subscribers || 0}
-
-📝 ${info.description || "No description."}`,
+Reason:
+${err.message}`,
                     contextInfo: newsletterCtx()
                 },
-                { quoted: msg }
-            );
-
-        } catch (e) {
-            console.error(e);
-
-            await sock.sendMessage(
-                msg.key.remoteJid,
                 {
-                    text: `❌ ${e.message}`
-                },
-                { quoted: msg }
+                    quoted: msg
+                }
             );
+
         }
     }
 };
