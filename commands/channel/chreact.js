@@ -1,97 +1,125 @@
+'use strict';
+
 /**
  * Channel React Command
  * React to a WhatsApp Channel post
  */
 
-const { newsletterCtx } = require("../../utils/context");
+const {
+    reactMultiple
+} = require('../../utils/channel');
+
+const {
+    newsletterCtx
+} = require('../../utils/context');
 
 module.exports = {
-    name: "chreact",
-    aliases: ["reactchannel"],
-    category: "channel",
-    description: "React to a WhatsApp Channel post.",
-    usage: ".chreact <channel_url> [emoji emoji ...]",
+    name: 'chreact',
+    aliases: [
+        'channelreact',
+        'reactchannel',
+        'cr'
+    ],
+    category: 'channel',
+    description: 'React to a WhatsApp Channel post.',
+    usage: '.chreact <channel_post_url> [emoji1 emoji2 ...]',
     owner: true,
 
     async execute(sock, msg, args) {
+
         try {
-            if (!args[0]) {
-                return sock.sendMessage(
+
+            if (!args.length) {
+
+                return await sock.sendMessage(
                     msg.key.remoteJid,
                     {
                         text:
-`❌ Example:
-.chreact https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n/166 ❤️ 👍 🔥`
+`❌ Please provide a WhatsApp Channel post URL.
+
+Example:
+
+.chreact https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n/166 ❤️ 🔥 👍`
                     },
-                    { quoted: msg }
+                    {
+                        quoted: msg
+                    }
                 );
+
             }
 
             const url = args[0];
 
-            const match = url.match(
-                /channel\/([A-Za-z0-9]+)\/(\d+)/
-            );
+            let emojis = args.slice(1);
 
-            if (!match) {
-                return sock.sendMessage(
-                    msg.key.remoteJid,
-                    {
-                        text: "❌ Invalid WhatsApp Channel URL."
-                    },
-                    { quoted: msg }
-                );
-            }
+            if (!emojis.length) {
 
-            const inviteCode = match[1];
-            const postId = match[2];
+                emojis = [
+                    "❤️",
+                    "🔥",
+                    "👍"
+                ];
 
-            const emojis =
-                args.slice(1).length > 0
-                    ? args.slice(1)
-                    : ["❤️", "👍", "🔥"];
-
-            // Fetch newsletter metadata
-            const metadata = await sock.newsletterMetadata(
-                "invite",
-                inviteCode
-            );
-
-            const newsletterJid = metadata.id;
-
-            for (const emoji of emojis) {
-                await sock.newsletterReactMessage(
-                    newsletterJid,
-                    postId,
-                    emoji
-                );
-
-                await new Promise(resolve =>
-                    setTimeout(resolve, 800)
-                );
             }
 
             await sock.sendMessage(
                 msg.key.remoteJid,
                 {
                     text:
-`✅ Successfully reacted!
+`⏳ Reacting to channel post...
 
-📢 Channel:
-${newsletterJid}
-
-📝 Post:
-${postId}
-
-😊 Reactions:
-${emojis.join(" ")}`,
-                    contextInfo: newsletterCtx()
+${emojis.join(" ")}`
                 },
-                { quoted: msg }
+                {
+                    quoted: msg
+                }
             );
 
-        } catch (err) {
-            console.error(err);
+            const reactions = await reactMultiple(
+                sock,
+                url,
+                emojis
+            );
+
+            const info = reactions[0];
+
+            const success = `╭━━〔 *CHANNEL REACTION* 〕━━⬣
+
+✅ Successfully reacted!
+
+📢 *Channel*
+${info.metadata.name}
+
+🆔 *Channel ID*
+${info.metadata.id}
+
+📝 *Post ID*
+${info.postId}
+
+😊 *Reactions*
+${emojis.join(" ")}
+
+⚡ *Total Sent*
+${reactions.length}
+
+╰━━━━━━━━━━━━━━⬣`;
+
+            await sock.sendMessage(
+                msg.key.remoteJid,
+                {
+                    text: success,
+                    contextInfo: newsletterCtx()
+                },
+                {
+                    quoted: msg
+                }
+            );
+
+        }
+
+        catch (err) {
+
+            console.error("CHREACT ERROR:", err);
 
             await sock.sendMessage(
                 msg.key.remoteJid,
@@ -99,10 +127,17 @@ ${emojis.join(" ")}`,
                     text:
 `❌ Failed to react.
 
-${err.message}`
+Reason:
+${err.message}`,
+                    contextInfo: newsletterCtx()
                 },
-                { quoted: msg }
+                {
+                    quoted: msg
+                }
             );
+
         }
+
     }
+
 };
