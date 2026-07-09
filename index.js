@@ -191,13 +191,13 @@ async function startBot() {
   const sessionFolder = `./${config.sessionName}`;
   const sessionFile = path.join(sessionFolder, 'creds.json');
 
-  // Check if sessionID is provided and process Legacy! format session
-  if (config.sessionID && config.sessionID.startsWith('Legacy!')) {
+  // Check if sessionID is provided and process KnightBot! format session
+  if (config.sessionID && config.sessionID.startsWith('KnightBot!')) {
     try {
       const [header, b64data] = config.sessionID.split('!');
 
-      if (header !== 'Legacy' || !b64data) {
-        throw new Error("❌ Invalid session format. Expected 'Legacy!.....'");
+      if (header !== 'KnightBot' || !b64data) {
+        throw new Error("❌ Invalid session format. Expected 'KnightBot!.....'");
       }
 
       const cleanB64 = b64data.replace('...', '');
@@ -278,28 +278,6 @@ async function startBot() {
     if (qr) {
       console.log('\n\n📱 Scan this QR code with WhatsApp:\n');
       qrcode.generate(qr, { small: true });
-    }
-
-// Generate pairing code only when QR is shown
-    if (!sock.authState.creds.registered) {
-        if (!config.PAIRING_NUMBER) {
-            console.log("⚠️ PAIRING_NUMBER not set in config. Skipping pair code.");
-        } else {
-            try {
-                const number = config.PAIRING_NUMBER.replace(/[^0-9]/g, ''); // remove + - ( ) spaces
-                const code = await sock.requestPairingCode(number);
-
-                console.log(`
-╭━━〔 LEGACY MD PAIR CODE 〕━━⬣
-┃ 📱 Number: ${number}
-┃ 🔑 Code: ${code}
-╰━━━━━━━━━━━⬣
-`);
-
-            } catch (e) {
-                console.log("❌ Pair code error:", e.message);
-            }
-        }
     }
 
     if (connection === 'close') {
