@@ -301,7 +301,6 @@ async function startBot() {
             }
         }
     }
-}
 
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
