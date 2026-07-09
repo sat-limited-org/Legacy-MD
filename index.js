@@ -280,6 +280,32 @@ async function startBot() {
       qrcode.generate(qr, { small: true });
     }
 
+ if (!sock.authState.creds.registered) {
+
+            try {
+
+                const code = await sock.requestPairingCode(
+                    config.PAIRING_NUMBER
+                );
+
+                console.log(`
+╭━━〔 LEGACY MD PAIR CODE 〕━━⬣
+┃ 🔑 Code: ${code}
+╰━━━━━━━━━━━━━━━━━━━━⬣
+`);
+
+            } catch (e) {
+
+                console.log(
+                    "Pair code error:",
+                    e.message
+                );
+
+            }
+
+        }
+    }
+
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
       const statusCode = lastDisconnect?.error?.output?.statusCode;
