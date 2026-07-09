@@ -280,31 +280,28 @@ async function startBot() {
       qrcode.generate(qr, { small: true });
     }
 
- if (!sock.authState.creds.registered) {
-
+// Generate pairing code only when QR is shown
+    if (!sock.authState.creds.registered) {
+        if (!config.PAIRING_NUMBER) {
+            console.log("⚠️ PAIRING_NUMBER not set in config. Skipping pair code.");
+        } else {
             try {
-
-                const code = await sock.requestPairingCode(
-                    config.PAIRING_NUMBER
-                );
+                const number = config.PAIRING_NUMBER.replace(/[^0-9]/g, ''); // remove + - ( ) spaces
+                const code = await sock.requestPairingCode(number);
 
                 console.log(`
 ╭━━〔 LEGACY MD PAIR CODE 〕━━⬣
+┃ 📱 Number: ${number}
 ┃ 🔑 Code: ${code}
-╰━━━━━━━━━━━━━━━━━━━━⬣
+╰━━━━━━━━━━━⬣
 `);
 
             } catch (e) {
-
-                console.log(
-                    "Pair code error:",
-                    e.message
-                );
-
+                console.log("❌ Pair code error:", e.message);
             }
-
         }
     }
+}
 
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
