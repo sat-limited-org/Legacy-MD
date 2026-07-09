@@ -148,7 +148,7 @@ if (categories.channel) {
   menuText += `┗━━━━━━━━━━━━━━━━━\n`;
   menuText += `│ ➜ ${config.prefix}chmenu\n`;
   menuText += `\n`;
-}q
+}
       
       // Utility Commands
       if (categories.utility) {
