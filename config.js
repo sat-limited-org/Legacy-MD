@@ -10,7 +10,7 @@ module.exports = {
     // Bot Configuration
     botName: 'Legacy MD',
     prefix: '.',
-    PAIRING_NUMBER: "260XXXXXXXXX",
+    PAIRING_NUMBER: "260761780398",
     owner: 'SAT Limited',
     bot_version: '2.0.0',
     channel: 'https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n',
