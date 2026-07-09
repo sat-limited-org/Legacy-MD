@@ -144,13 +144,11 @@ if (categories.interaction) {
       // Channel Commands
 if (categories.channel) {
   menuText += `┏━━━━━━━━━━━━━━━━━\n`;
-  menuText += `┃ 🤖 CHANNEL MANAGEMENT COMMANDS\n`;
+  menuText += `┃ 📢 CHANNEL COMMANDS\n`;
   menuText += `┗━━━━━━━━━━━━━━━━━\n`;
-  categories.channel.forEach(cmd => {
-    menuText += `│ ➜ ${config.prefix}${cmd.name}\n`;
-  });
+  menuText += `│ ➜ ${config.prefix}chmenu\n`;
   menuText += `\n`;
-}
+}q
       
       // Utility Commands
       if (categories.utility) {
@@ -175,7 +173,7 @@ if (categories.channel) {
        }
 
         // Textmaker Commands
-        if (categories.utility) {
+        if (categories.textmaker) {
          menuText += `┏━━━━━━━━━━━━━━━━━\n`;
          menuText += `┃ 🖋️ TEXTMAKER COMMAND\n`;
          menuText += `┗━━━━━━━━━━━━━━━━━\n`;
