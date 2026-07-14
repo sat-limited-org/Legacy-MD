@@ -3,6 +3,11 @@ const path = require("path")
 
 module.exports = {
     name: "pastpaper",
+    permission: 'public',
+    category: 'education',
+    group: true,
+    private: true,
+    channel: true,
     async execute(sock, msg, args) {
         const from = msg.key.remoteJid
         const year = args[1]
