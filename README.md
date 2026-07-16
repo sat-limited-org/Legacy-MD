@@ -112,6 +112,8 @@ Contributions are welcome. Please open an issue or submit a pull request.
 - Baileys developers
 
 ## 📄 License
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT) - see the [LICENSE](https://github.com/sat-limited-org/Legacy-MD/blob/main/LICENSE) file for details.
+
 
 ---
 
