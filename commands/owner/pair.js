@@ -1,5 +1,5 @@
-import makeWASocket, { useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
-import fs from 'fs';
+const makeWASocket, { useMultiFileAuthState, DisconnectReason } from '@whiskeysockets/baileys';
+const fs from 'fs';
 
 export default {
     name: 'pair',
