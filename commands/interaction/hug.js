@@ -37,7 +37,7 @@ async function getHugImage() {
     const apis = [
         'https://api.waifu.pics/sfw/hug',
         'https://api.otaku-api.com/v1/hug',
-'https://api.some-random-api.com/animu/hug',
+      'https://api.some-random-api.com/animu',
         'https://nekos.best/api/v2/hug'
     ];
     
