@@ -280,6 +280,19 @@ async function startBot() {
       qrcode.generate(qr, { small: true });
     }
 
+// Ensure registration state is false before requesting
+if (!sock.authState.creds.registered) {
+    try {
+        // Replace with your target number in E.164 format (e.g., '260950000000')
+        const phoneNumber = 'YOUR_PHONE_NUMBER'; 
+        
+        const code = await sock.requestPairingCode(phoneNumber);
+        console.log(`Pairing Code: ${code}`);
+    } catch (error) {
+        console.error('Error generating pairing code:', error);
+    }
+}
+
     if (connection === 'close') {
       const shouldReconnect = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut;
       const statusCode = lastDisconnect?.error?.output?.statusCode;
