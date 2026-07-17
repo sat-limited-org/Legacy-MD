@@ -799,7 +799,7 @@ for (const command of commands) {
     }
 
     const isJidBroadcast = from.endsWith('@newsletter');
-    if (isChannel && !commandFile.permissions.isJidBroadcast) {
+    if (isJidBroadcast && !commandFile.permissions.isJidBroadcast) {
             // Note: Sending text back to a channel requires the bot to be an Admin in that channel
             try {
                 await sock.sendMessage(from, { text: '❌ This command is disabled inside channels.' });
