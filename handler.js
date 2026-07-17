@@ -798,8 +798,8 @@ for (const command of commands) {
       return sock.sendMessage(from, { text: config.messages.ownerOnly }, { quoted: msg });
     }
 
-    const isChannel = from.endsWith('@newsletter');
-    if (isChannel && !commandFile.permissions.channel) {
+    const isJidBroadcast = from.endsWith('@newsletter');
+    if (isChannel && !commandFile.permissions.isJidBroadcast) {
             // Note: Sending text back to a channel requires the bot to be an Admin in that channel
             try {
                 await sock.sendMessage(from, { text: '❌ This command is disabled inside channels.' });
@@ -846,7 +846,7 @@ for (const command of commands) {
       isGroup,
       groupMetadata,
       isOwner: isOwner(sender),
-      isChannel,
+      isJidBroadcast,
       isAdmin: await isAdmin(sock, sender, from, groupMetadata),
       isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
       isMod: isMod(sender),
@@ -1432,6 +1432,7 @@ module.exports = {
   handleAntilink,
   handleAntigroupmention,
   initializeAntiCall,
+  isJidBroadcast,
   isOwner,
   isAdmin,
   isBotAdmin,
