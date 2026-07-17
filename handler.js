@@ -3,6 +3,7 @@
  */
 
 const config = require('./config');
+const { isJidBroadcast } = require('@whiskeysockets/baileys');
 const database = require('./database');
 const { loadCommands } = require('./utils/commandLoader');
 const { addMessage } = require('./utils/groupstats');
