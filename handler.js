@@ -796,6 +796,16 @@ for (const command of commands) {
     if (command.ownerOnly && !isOwner(sender)) {
       return sock.sendMessage(from, { text: config.messages.ownerOnly }, { quoted: msg });
     }
+
+    if (isChannel && !commandFile.permissions.channel) {
+            // Note: Sending text back to a channel requires the bot to be an Admin in that channel
+            try {
+                await sock.sendMessage(from, { text: '❌ This command is disabled inside channels.' });
+            } catch (err) {
+                console.error('Cannot reply to channel (Bot might not be an admin):', err.message);
+            }
+            return;
+        }
     
     if (command.modOnly && !isMod(sender) && !isOwner(sender)) {
       return sock.sendMessage(from, { text: '🔒 This command is only for moderators!' }, { quoted: msg });
@@ -836,6 +846,7 @@ for (const command of commands) {
       isOwner: isOwner(sender),
       isAdmin: await isAdmin(sock, sender, from, groupMetadata),
       isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
+      isChannel,
       isMod: isMod(sender),
       reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
       react: (emoji) => sock.sendMessage(from, { react: { text: emoji, key: msg.key } })
