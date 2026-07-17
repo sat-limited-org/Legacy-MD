@@ -797,6 +797,7 @@ for (const command of commands) {
       return sock.sendMessage(from, { text: config.messages.ownerOnly }, { quoted: msg });
     }
 
+    const isChannel = from.endsWith('@newsletter');
     if (isChannel && !commandFile.permissions.channel) {
             // Note: Sending text back to a channel requires the bot to be an Admin in that channel
             try {
@@ -844,9 +845,9 @@ for (const command of commands) {
       isGroup,
       groupMetadata,
       isOwner: isOwner(sender),
+      isChannel,
       isAdmin: await isAdmin(sock, sender, from, groupMetadata),
       isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
-      isChannel,
       isMod: isMod(sender),
       reply: (text) => sock.sendMessage(from, { text }, { quoted: msg }),
       react: (emoji) => sock.sendMessage(from, { react: { text: emoji, key: msg.key } })
