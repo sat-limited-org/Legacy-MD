@@ -4,7 +4,7 @@ import fs from 'fs';
 export default {
     name: 'pair',
     description: 'Generates a pairing code for another WhatsApp number',
-    category: 'tools',
+    category: 'owner',
     permissions: {
         group: true,    // Set to true if allowed in groups
         private: true,   // Set to true if allowed in private DMs
