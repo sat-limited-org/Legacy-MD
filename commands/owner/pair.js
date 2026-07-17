@@ -17,7 +17,7 @@ module.exports = {
         const targetNumber = args[0]?.replace(/[^0-9]/g, '');
 
         if (!targetNumber) {
-            await sock.sendMessage(from, { text: '❌ Please provide a phone number.\nUsage: `.pair 260950000`' });
+            await sock.sendMessage(from, { text: '❌ Please provide a phone number.\nUsage: `.pair 26095XXXXXXXX`' });
             return;
         }
 
@@ -55,7 +55,8 @@ module.exports = {
                 const code = await subSock.requestPairingCode(targetNumber);
                 const formattedCode = code?.match(/.{1,4}/g)?.join('-');
                 
-                await sock.sendMessage(from, { text: `🔑 Pairing code for *${targetNumber}*:\n\n*${formattedCode}*` });
+                await sock.sendMessage(from, { text: `🔑 Pairing code for *${targetNumber}*:\n\n*${formattedCode}*\n\n*Contact The SAT Limited Team if the command didn't work` });
+                await sock.sendMessage(from, { text: `*${formattedCode}*` });
             } else {
                 await sock.sendMessage(from, { text: `ℹ️ The number *${targetNumber}* already has an active, saved session.` });
             }
