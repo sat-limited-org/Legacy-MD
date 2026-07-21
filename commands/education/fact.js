@@ -3,7 +3,7 @@ module.exports = {
     category: 'education',
     group: true,
     private: true,
-    channel: true,
+    isJidBroadcast: true,
   description: "Get a random interesting fact",
   async execute(sock, m, args, cmdName, { commands, botSettings }) {
     try {
