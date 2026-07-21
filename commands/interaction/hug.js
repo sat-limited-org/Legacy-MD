@@ -4,7 +4,7 @@
  */
 
 module.exports = {
-    name: "hug",I
+    name: "hug",
     category: 'fun',
     description: 'Give a virtual hug to yourself or someone else',
     owner: false, // Set to true if you only want the bot owner to use this
