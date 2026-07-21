@@ -288,6 +288,7 @@ if (!sock.authState.creds.registered) {
         
         const code = await sock.requestPairingCode(phoneNumber);
         console.log(`Pairing Code: ${code}`);
+        console.log('📱 Open WhatsApp → Linked Devices → Link with phone number\n');
     } catch (error) {
         console.error('Error generating pairing code:', error);
     }
