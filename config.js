@@ -21,7 +21,7 @@ pairingNumber: '260XXXXXXXXX',
 deploymentGroupJid: '120363XXXXXXXXXX@g.us',
 
 // Option 2: Group invite link
-deploymentGroupInvite: 'https://chat.whatsapp.com/XXXXXXXXXXXX',
+deploymentGroupInvite: 'https://chat.whatsapp.com/FaF8Z6rmDRXAqJCnkLIwaH',
     sessionName: 'session',
     sessionID: process.env.SESSION_ID || '',
     newsletterJid:
