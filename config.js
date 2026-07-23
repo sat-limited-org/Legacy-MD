@@ -10,10 +10,18 @@ module.exports = {
     // Bot Configuration
     botName: 'Legacy MD',
     prefix: '.',
-    PAIRING_NUMBER: "260761780398",
     owner: 'SAT Limited',
     bot_version: '2.0.0',
     channel: 'https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n',
+    usePairingCode: true,
+
+pairingNumber: '260XXXXXXXXX',
+
+// Option 1: Group JID
+deploymentGroupJid: '120363XXXXXXXXXX@g.us',
+
+// Option 2: Group invite link
+deploymentGroupInvite: 'https://chat.whatsapp.com/XXXXXXXXXXXX',
     sessionName: 'session',
     sessionID: process.env.SESSION_ID || '',
     newsletterJid:
