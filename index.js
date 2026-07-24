@@ -340,3 +340,82 @@ const createSuppressedLogger =
 // DEPLOYMENT MESSAGE
 // --------------------------------------------------
 
+
+if (
+    config.sessionID &&
+    config.sessionID.startsWith(
+      'Legacy!'
+    )
+  ) {
+    try {
+      const [
+        header,
+        b64data
+      ] =
+        config.sessionID.split(
+          '!'
+        );
+
+      if (
+        header !==
+          'Legacy' ||
+        !b64data
+      ) {
+        throw new Error(
+          "Invalid session format. Expected 'Legacy!.....'"
+        );
+      }
+
+      const cleanB64 =
+        b64data.replace(
+          '...',
+          ''
+        );
+
+      const compressedData =
+        Buffer.from(
+          cleanB64,
+          'base64'
+        );
+
+      const decompressedData =
+        zlib.gunzipSync(
+          compressedData
+        );
+
+      if (
+        !fs.existsSync(
+          sessionFolder
+        )
+      ) {
+        fs.mkdirSync(
+          sessionFolder,
+          {
+            recursive: true
+          }
+        );
+      }
+
+      fs.writeFileSync(
+        sessionFile,
+        decompressedData,
+        'utf8'
+      );
+
+      console.log(
+        '📡 Session: 🔑 Retrieved from SAT Limited Session'
+      );
+
+    } catch (e) {
+      console.error(
+        '📡 Session: ❌ Error processing session:',
+        e.message
+      );
+    }
+  }
+
+  // --------------------------------------------------
+  // AUTH STATE
+  // --------------------------------------------------
+
+
