@@ -1,3 +1,5 @@
+const invalidCommand = require('config.invalidCommand');
+
 module.exports = async (sock, msg, commandName, prefix) => {
   try {
     const from = msg.key.remoteJid;
