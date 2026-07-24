@@ -110,3 +110,111 @@ const os = require('os');
 // --------------------------------------------------
 // PUPPETEER CACHE CLEANUP
 // --------------------------------------------------
+
+function cleanupPuppeteerCache() {
+  try {
+    const home = os.homedir();
+
+    const cacheDir = path.join(
+      home,
+      '.cache',
+      'puppeteer'
+    );
+
+    if (fs.existsSync(cacheDir)) {
+      console.log(
+        '🧹 Removing Puppeteer cache at:',
+        cacheDir
+      );
+
+      fs.rmSync(cacheDir, {
+        recursive: true,
+        force: true
+      });
+
+      console.log(
+        '✅ Puppeteer cache removed'
+      );
+    }
+  } catch (err) {
+    console.error(
+      '⚠️ Failed to cleanup Puppeteer cache:',
+      err.message || err
+    );
+  }
+}
+
+// --------------------------------------------------
+// MESSAGE STORE
+// --------------------------------------------------
+
+const store = {
+  messages: new Map(),
+
+  maxPerChat: 20,
+
+  bind: ev => {
+    ev.on(
+      'messages.upsert',
+      ({ messages }) => {
+        for (
+          const msg of messages
+        ) {
+          if (!msg.key?.id) {
+            continue;
+          }
+
+          const jid =
+            msg.key.remoteJid;
+
+          if (
+            !store.messages.has(jid)
+          ) {
+            store.messages.set(
+              jid,
+              new Map()
+            );
+          }
+
+          const chatMsgs =
+            store.messages.get(jid);
+
+          chatMsgs.set(
+            msg.key.id,
+            msg
+          );
+
+          if (
+            chatMsgs.size >
+            store.maxPerChat
+          ) {
+            const oldestKey =
+              chatMsgs.keys()
+                .next()
+                .value;
+
+            chatMsgs.delete(
+              oldestKey
+            );
+          }
+        }
+      }
+    );
+  },
+
+  loadMessage: async (
+    jid,
+    id
+  ) => {
+    return (
+      store.messages
+        .get(jid)
+        ?.get(id) ||
+      null
+    );
+  }
+};
+
+// --------------------------------------------------
+// MESSAGE DEDUPLICATION
+// --------------------------------------------------
