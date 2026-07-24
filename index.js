@@ -551,3 +551,73 @@ const {
 
 
 
+let lastActivity =
+    Date.now();
+
+  const INACTIVITY_TIMEOUT =
+    30 * 60 * 1000;
+
+  const watchdogInterval =
+    setInterval(
+      async () => {
+        try {
+          if (
+            Date.now() -
+              lastActivity >
+              INACTIVITY_TIMEOUT &&
+            sock.ws?.readyState ===
+              1
+          ) {
+            console.log(
+              '⚠️ No activity detected. Forcing reconnect...'
+            );
+
+            await sock.end(
+              undefined,
+              undefined,
+              {
+                reason:
+                  'inactive'
+              }
+            );
+
+            clearInterval(
+              watchdogInterval
+            );
+
+            setTimeout(
+              () =>
+                startBot(),
+              5000
+            );
+          }
+        } catch (error) {
+          console.error(
+            'Watchdog error:',
+            error.message
+          );
+        }
+      },
+      5 * 60 * 1000
+    );
+
+  // --------------------------------------------------
+  // CONNECTION UPDATE
+  // QR + PAIRING CODE
+  // --------------------------------------------------
+
+  let pairingCodeRequested =
+    false;
+
+  sock.ev.on(
+    'connection.update',
+    async update => {
+      const {
+        connection,
+        lastDisconnect,
+        qr
+      } = update;
+
+      // ----------------------------------------------
+      // QR CODE
+      // ----------------------------------------------
