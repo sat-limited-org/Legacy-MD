@@ -1,45 +1,34 @@
-'use strict';
+// commands/allow.js
+import fs from 'fs';
+import path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-
-const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
-
-module.exports = {
+const allowGroupCommand = {
     name: 'allow',
-    aliases: ['gcallow', 'gca'],
-    description: 'Allow this group to use the bot.',
-    usage: '.allow',
-    ownerOnly: true,
-    groupOnly: true,
-
-    async execute(sock, msg, args, extra) {
-        const from = extra.from;
-        const sender = extra.sender;
-
-        if (!from.endsWith('@g.us')) {
-            return sock.sendMessage(from, {
-                text: '❌ This command can only be used in groups.'
-            }, { quoted: msg });
+    category: 'admin',
+    permission: 'sudo', // Only bot owners can authorize groups
+    async execute(sock, msg, args) {
+        const jid = msg.key.remoteJid;
+        if (!jid.endsWith('@g.us')) {
+            return sock.sendMessage(jid, { text: '❌ This command can only be used inside a group chat.' });
         }
 
-        let groups = [];
-
-        if (fs.existsSync(dbPath)) {
-            try {
-                groups = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-            } catch (e) {
-                groups = [];
-            }
+        const filePath = path.resolve('./data/allowedGroups.json');
+        
+        // Read existing array safely
+        let allowedGroups = [];
+        if (fs.existsSync(filePath)) {
+            allowedGroups = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         }
 
-        if (!groups.includes(from)) {
-            groups.push(from);
-            fs.writeFileSync(dbPath, JSON.stringify(groups, null, 2));
+        // Check duplicate entry
+        if (allowedGroups.includes(jid)) {
+            return sock.sendMessage(jid, { text: 'ℹ️ This group is already on the allowlist.' });
         }
 
-        await sock.sendMessage(from, {
-            text: '✅ This group has been allowed to use the bot.'
-        }, { quoted: msg });
+        // Add, save, and respond
+        allowedGroups.push(jid);
+        fs.writeFileSync(filePath, JSON.stringify(allowedGroups, null, 4));
+
+        await sock.sendMessage(jid, { text: '✅ Success! This group is now allowed to use the bot.' });
     }
 };
