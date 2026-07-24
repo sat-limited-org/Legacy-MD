@@ -4,6 +4,7 @@ import path from 'path';
 
 const disallowGroupCommand = {
     name: 'disallow',
+    aliases: ['deny'],
     category: 'admin',
     permission: 'sudo',
     owner: 'true',
