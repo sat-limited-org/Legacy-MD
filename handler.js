@@ -1442,7 +1442,7 @@ module.exports = {
   handleAntilink,
   handleAntigroupmention,
   initializeAntiCall,
-  isJidBroadcast,
+  isChannel,
   isOwner,
   isAdmin,
   isBotAdmin,
