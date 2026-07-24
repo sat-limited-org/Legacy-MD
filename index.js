@@ -826,3 +826,82 @@ if (
         // ------------------------------------------
         // BOT STATUS
         // ------------------------------------------
+
+if (
+          config.autoBio
+        ) {
+          await sock.updateProfileStatus(
+            `${config.botName} | Active 24/7`
+          );
+        }
+
+        // ------------------------------------------
+        // ANTICALL
+        // ------------------------------------------
+
+        handler.initializeAntiCall(
+          sock
+        );
+
+        // ------------------------------------------
+        // STORE CLEANUP
+        // ------------------------------------------
+
+        const now =
+          Date.now();
+
+        for (
+          const [
+            jid,
+            chatMsgs
+          ]
+          of store.messages
+            .entries()
+        ) {
+          const timestamps =
+            Array.from(
+              chatMsgs.values()
+            ).map(
+              m =>
+                m.messageTimestamp *
+                  1000 ||
+                0
+            );
+
+          if (
+            timestamps.length >
+              0 &&
+            now -
+              Math.max(
+                ...timestamps
+              ) >
+              24 *
+                60 *
+                60 *
+                1000
+          ) {
+            store.messages.delete(
+              jid
+            );
+          }
+        }
+
+        console.log(
+          `🧹 Store cleaned. Active chats: ${store.messages.size}`
+        );
+      }
+    }
+  );
+
+  // --------------------------------------------------
+  // CREDENTIALS
+  // --------------------------------------------------
+
+  sock.ev.on(
+    'creds.update',
+    saveCreds
+  );
+
+  // --------------------------------------------------
+  // SYSTEM JID FILTER
+  // --------------------------------------------------
