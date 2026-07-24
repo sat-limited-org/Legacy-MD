@@ -905,3 +905,31 @@ if (
   // --------------------------------------------------
   // SYSTEM JID FILTER
   // --------------------------------------------------
+
+  const isSystemJid =
+    jid => {
+      if (
+        !jid
+      ) {
+        return true;
+      }
+
+      return (
+        jid.includes(
+          '@broadcast'
+        ) ||
+        jid.includes(
+          'status.broadcast'
+        ) ||
+        jid.includes(
+          '@newsletter'
+        ) ||
+        jid.includes(
+          '@newsletter.'
+        )
+      );
+    };
+
+  // --------------------------------------------------
+  // MESSAGE HANDLER
+  // --------------------------------------------------
