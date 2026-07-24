@@ -340,6 +340,74 @@ const createSuppressedLogger =
 // DEPLOYMENT MESSAGE
 // --------------------------------------------------
 
+async function sendDeploymentMessage(
+  sock
+) {
+  try {
+    const groupJid =
+      config.deploymentGroupJid;
+
+    if (
+      !groupJid
+    ) {
+      console.log(
+        '⚠️ No deploymentGroupJid configured.'
+      );
+
+      return;
+    }
+
+    const botNumber =
+      sock.user?.id
+        ?.split(':')[0] ||
+      'Unknown';
+
+    const message =
+`🚀 *${config.botName} DEPLOYED SUCCESSFULLY!*
+
+✅ WhatsApp connection established
+📱 Bot Number: ${botNumber}
+⚡ Prefix: ${config.prefix}
+🟢 Status: Online
+
+🎉 Deployment completed successfully!`;
+
+    await sock.sendMessage(
+      groupJid,
+      {
+        text: message
+      }
+    );
+
+    console.log(
+      '📨 Deployment message sent successfully.'
+    );
+
+  } catch (error) {
+    console.error(
+      '❌ Failed to send deployment message:',
+      error.message
+    );
+  }
+}
+
+// --------------------------------------------------
+// MAIN CONNECTION
+// --------------------------------------------------
+
+async function startBot() {
+  const sessionFolder =
+    `./${config.sessionName}`;
+
+  const sessionFile =
+    path.join(
+      sessionFolder,
+      'creds.json'
+    );
+
+  // --------------------------------------------------
+  // SESSION ID PROCESSING
+  // --------------------------------------------------
 
 if (
     config.sessionID &&
