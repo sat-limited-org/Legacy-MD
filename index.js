@@ -549,8 +549,6 @@ const {
   // WATCHDOG
   // --------------------------------------------------
 
-
-
 let lastActivity =
     Date.now();
 
@@ -620,4 +618,99 @@ let lastActivity =
 
       // ----------------------------------------------
       // QR CODE
+      // ----------------------------------------------
+
+if (
+        qr &&
+        config.usePairingCode !==
+          true
+      ) {
+        console.log(
+          '\n📱 Scan this QR code with WhatsApp:\n'
+        );
+
+        qrcode.generate(
+          qr,
+          {
+            small: true
+          }
+        );
+      }
+
+      // ----------------------------------------------
+      // PAIRING CODE
+      // ----------------------------------------------
+
+      if (
+        !state.creds.registered &&
+        config.usePairingCode ===
+          true &&
+        config.pairingNumber &&
+        !pairingCodeRequested
+      ) {
+        pairingCodeRequested =
+          true;
+
+        try {
+          const phoneNumber =
+            config.pairingNumber
+              .replace(
+                /[^0-9]/g,
+                ''
+              );
+
+          console.log(
+            `\n📞 Requesting pairing code for: ${phoneNumber}`
+          );
+
+          const code =
+            await sock.requestPairingCode(
+              phoneNumber
+            );
+
+          console.log(
+            '\n╭────────────────────────────╮'
+          );
+
+          console.log(
+            `│ 🔐 PAIRING CODE: ${code} │`
+          );
+
+          console.log(
+            '╰────────────────────────────╯\n'
+          );
+
+          console.log(
+            '📱 Open WhatsApp'
+          );
+
+          console.log(
+            '⚙️ Settings → Linked Devices'
+          );
+
+          console.log(
+            '➕ Link a Device'
+          );
+
+          console.log(
+            '🔗 Link with phone number instead'
+          );
+
+          console.log(
+            `🔐 Enter code: ${code}\n`
+          );
+
+        } catch (error) {
+          pairingCodeRequested =
+            false;
+
+          console.error(
+            '❌ Error generating pairing code:',
+            error.message
+          );
+        }
+      }
+
+      // ----------------------------------------------
+      // CONNECTION CLOSED
       // ----------------------------------------------
