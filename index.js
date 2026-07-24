@@ -1226,3 +1226,47 @@ sock.ev.on(
 // START BOT
 // --------------------------------------------------
 
+console.log(
+  '🚀 Starting WhatsApp MD Bot...\n'
+);
+
+console.log(
+  `📦 Bot Name: ${config.botName}`
+);
+
+console.log(
+  `⚡ Prefix: ${config.prefix}`
+);
+
+const ownerNames =
+  Array.isArray(
+    config.ownerName
+  )
+    ? config.ownerName.join(
+        ','
+      )
+    : config.ownerName;
+
+console.log(
+  `👑 Owner: ${ownerNames}\n`
+);
+
+cleanupPuppeteerCache();
+
+startBot().catch(
+  err => {
+    console.error(
+      'Error starting bot:',
+      err
+    );
+
+    process.exit(
+      1
+    );
+  }
+);
+
+// --------------------------------------------------
+// PROCESS TERMINATION
+// --------------------------------------------------
+
