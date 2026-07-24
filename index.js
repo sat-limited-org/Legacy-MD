@@ -1165,3 +1165,64 @@ if (
   // MESSAGE UPDATES
   // --------------------------------------------------
 
+sock.ev.on(
+    'message-receipt.update',
+    () => {}
+  );
+
+  sock.ev.on(
+    'messages.update',
+    () => {}
+  );
+
+  // --------------------------------------------------
+  // GROUP PARTICIPANTS
+  // --------------------------------------------------
+
+  sock.ev.on(
+    'group-participants.update',
+    async update => {
+      await handler.handleGroupUpdate(
+        sock,
+        update
+      );
+    }
+  );
+
+  // --------------------------------------------------
+  // SOCKET ERRORS
+  // --------------------------------------------------
+
+  sock.ev.on(
+    'error',
+    error => {
+      const statusCode =
+        error?.output
+          ?.statusCode;
+
+      if (
+        statusCode ===
+          515 ||
+        statusCode ===
+          503 ||
+        statusCode ===
+          408
+      ) {
+        return;
+      }
+
+      console.error(
+        'Socket error:',
+        error.message ||
+          error
+      );
+    }
+  );
+
+  return sock;
+}
+
+// --------------------------------------------------
+// START BOT
+// --------------------------------------------------
+
