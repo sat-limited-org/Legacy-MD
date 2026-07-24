@@ -933,3 +933,235 @@ if (
   // --------------------------------------------------
   // MESSAGE HANDLER
   // --------------------------------------------------
+
+  sock.ev.on(
+    'messages.upsert',
+    ({
+      messages,
+      type
+    }) => {
+      if (
+        type !==
+        'notify'
+      ) {
+        return;
+      }
+
+      for (
+        const msg
+        of messages
+      ) {
+        if (
+          !msg.message ||
+          !msg.key?.id
+        ) {
+          continue;
+        }
+
+        const from =
+          msg.key.remoteJid;
+
+        if (
+          !from
+        ) {
+          continue;
+        }
+
+        if (
+          isSystemJid(
+            from
+          )
+        ) {
+          continue;
+        }
+
+        const msgId =
+          msg.key.id;
+
+        if (
+          processedMessages.has(
+            msgId
+          )
+        ) {
+          continue;
+        }
+
+        const MESSAGE_AGE_LIMIT =
+          5 *
+          60 *
+          1000;
+
+        let messageAge =
+          0;
+
+        if (
+          msg.messageTimestamp
+        ) {
+          messageAge =
+            Date.now() -
+            msg.messageTimestamp *
+              1000;
+
+          if (
+            messageAge >
+            MESSAGE_AGE_LIMIT
+          ) {
+            continue;
+          }
+        }
+
+        processedMessages.add(
+          msgId
+        );
+
+        // Store message
+        if (
+          msg.key &&
+          msg.key.id
+        ) {
+          if (
+            !store.messages.has(
+              from
+            )
+          ) {
+            store.messages.set(
+              from,
+              new Map()
+            );
+          }
+
+          const chatMsgs =
+            store.messages.get(
+              from
+            );
+
+          chatMsgs.set(
+            msg.key.id,
+            msg
+          );
+
+          if (
+            chatMsgs.size >
+            store.maxPerChat
+          ) {
+            const sortedIds =
+              Array.from(
+                chatMsgs.entries()
+              )
+                .sort(
+                  (
+                    a,
+                    b
+                  ) =>
+                    (
+                      a[1]
+                        .messageTimestamp ||
+                      0
+                    ) -
+                    (
+                      b[1]
+                        .messageTimestamp ||
+                      0
+                    )
+                )
+                .map(
+                  (
+                    [
+                      id
+                    ]
+                  ) =>
+                    id
+                );
+
+            for (
+              let i =
+                0;
+
+              i <
+              sortedIds.length -
+                store.maxPerChat;
+
+              i++
+            ) {
+              chatMsgs.delete(
+                sortedIds[i]
+              );
+            }
+          }
+        }
+
+        // Process command
+        handler
+          .handleMessage(
+            sock,
+            msg
+          )
+          .catch(
+            err => {
+              if (
+                !err.message?.includes(
+                  'rate-overlimit'
+                ) &&
+                !err.message?.includes(
+                  'not-authorized'
+                )
+              ) {
+                console.error(
+                  'Error handling message:',
+                  err.message
+                );
+              }
+            }
+          );
+
+        // Background operations
+        setImmediate(
+          async () => {
+            if (
+              config.autoRead &&
+              from.endsWith(
+                '@g.us'
+              )
+            ) {
+              try {
+                await sock.readMessages(
+                  [
+                    msg.key
+                  ]
+                );
+              } catch {}
+            }
+
+            if (
+              from.endsWith(
+                '@g.us'
+              )
+            ) {
+              try {
+                const groupMetadata =
+                  await handler.getGroupMetadata(
+                    sock,
+                    msg.key.remoteJid
+                  );
+
+                if (
+                  groupMetadata
+                ) {
+                  await handler.handleAntilink(
+                    sock,
+                    msg,
+                    groupMetadata
+                  );
+                }
+              } catch {}
+            }
+          }
+        );
+      }
+    }
+  );
+
+  // --------------------------------------------------
+  // MESSAGE UPDATES
+  // --------------------------------------------------
+
