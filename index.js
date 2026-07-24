@@ -218,3 +218,125 @@ const store = {
 // --------------------------------------------------
 // MESSAGE DEDUPLICATION
 // --------------------------------------------------
+
+const processedMessages =
+  new Set();
+
+setInterval(
+  () => {
+    processedMessages.clear();
+  },
+  5 * 60 * 1000
+);
+
+// --------------------------------------------------
+// LOGGER
+// --------------------------------------------------
+
+const createSuppressedLogger =
+  (
+    level = 'silent'
+  ) => {
+    const forbiddenPatterns = [
+      'closing session',
+      'closing open session',
+      'sessionentry',
+      'prekey bundle',
+      'pendingprekey',
+      '_chains',
+      'registrationid',
+      'currentratchet',
+      'chainkey',
+      'ratchet',
+      'signal protocol',
+      'ephemeralkeypair',
+      'indexinfo',
+      'basekey',
+      'ratchetkey'
+    ];
+
+    let logger;
+
+    try {
+      logger = pino({
+        level,
+
+        transport:
+          process.env.NODE_ENV ===
+          'production'
+            ? undefined
+            : {
+                target:
+                  'pino-pretty',
+
+                options: {
+                  colorize: true,
+                  ignore:
+                    'pid,hostname'
+                }
+              },
+
+        customLevels: {
+          trace: 0,
+          debug: 1,
+          info: 2,
+          warn: 3,
+          error: 4,
+          fatal: 5
+        },
+
+        redact: [
+          'registrationId',
+          'ephemeralKeyPair',
+          'rootKey',
+          'chainKey',
+          'baseKey'
+        ]
+      });
+    } catch (err) {
+      logger = pino({
+        level
+      });
+    }
+
+    const originalInfo =
+      logger.info.bind(
+        logger
+      );
+
+    logger.info = (
+      ...args
+    ) => {
+      const msg =
+        args
+          .map(a =>
+            typeof a ===
+            'string'
+              ? a
+              : JSON.stringify(a)
+          )
+          .join(' ')
+          .toLowerCase();
+
+      if (
+        !forbiddenPatterns.some(
+          pattern =>
+            msg.includes(pattern)
+        )
+      ) {
+        originalInfo(
+          ...args
+        );
+      }
+    };
+
+    logger.debug = () => {};
+    logger.trace = () => {};
+
+    return logger;
+  };
+
+// --------------------------------------------------
+// DEPLOYMENT MESSAGE
+// --------------------------------------------------
+
