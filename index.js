@@ -486,4 +486,68 @@ if (
   // AUTH STATE
   // --------------------------------------------------
 
+const {
+    state,
+    saveCreds
+  } =
+    await useMultiFileAuthState(
+      sessionFolder
+    );
+
+  const {
+    version
+  } =
+    await fetchLatestBaileysVersion();
+
+  const suppressedLogger =
+    createSuppressedLogger(
+      'silent'
+    );
+
+  // --------------------------------------------------
+  // SOCKET
+  // --------------------------------------------------
+
+  const sock =
+    makeWASocket({
+      version,
+
+      logger:
+        suppressedLogger,
+
+      printQRInTerminal:
+        false,
+
+      browser: [
+        'Chrome',
+        'Windows',
+        '10.0'
+      ],
+
+      auth: state,
+
+      syncFullHistory:
+        false,
+
+      downloadHistory:
+        false,
+
+      markOnlineOnConnect:
+        false,
+
+      getMessage:
+        async () =>
+          undefined
+    });
+
+  // Bind store
+  store.bind(
+    sock.ev
+  );
+
+  // --------------------------------------------------
+  // WATCHDOG
+  // --------------------------------------------------
+
+
 
