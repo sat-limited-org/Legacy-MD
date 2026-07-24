@@ -421,7 +421,7 @@ const handleMessage = async (sock, msg) => {
           const prefixList = ['.', '/', '#'];
           if (prefixList.includes(text?.trim()[0])) {
             await sock.sendMessage(jid, {
-              react: { text: '⏳', key: msg.key }
+              react: { text: '🤖', key: msg.key }
             });
           }
         }
@@ -799,7 +799,7 @@ for (const command of commands) {
     }
 
     const isJidBroadcast = from.endsWith('@newsletter');
-    if (isJidBroadcast && !commandFile.permissions.isJidBroadcast) {
+    if (isJidBroadcast && !commandFile.permissions.isChannel) {
             // Note: Sending text back to a channel requires the bot to be an Admin in that channel
             try {
                 await sock.sendMessage(from, { text: '❌ This command is disabled inside channels.' });
@@ -832,6 +832,16 @@ for (const command of commands) {
       }
     }
     
+// Check banned users block list
+if (fs.existsSync('./data/bannedUsers.json')) {
+    const bannedUsers = JSON.parse(fs.readFileSync('./data/bannedUsers.json', 'utf-8'));
+    
+    if (bannedUsers.includes(sender)) {
+        console.log(`Command ignored: Sender ${sender} is globally banned.`);
+        return; // Silently drop execution without giving feedback to spammy users
+    }
+}
+
     // Auto-typing
     if (config.autoTyping) {
       await sock.sendPresenceUpdate('composing', from);
@@ -846,7 +856,7 @@ for (const command of commands) {
       isGroup,
       groupMetadata,
       isOwner: isOwner(sender),
-      isJidBroadcast,
+      isChannel,
       isAdmin: await isAdmin(sock, sender, from, groupMetadata),
       isBotAdmin: await isBotAdmin(sock, from, groupMetadata),
       isMod: isMod(sender),
