@@ -1270,3 +1270,94 @@ startBot().catch(
 // PROCESS TERMINATION
 // --------------------------------------------------
 
+process.on(
+  'uncaughtException',
+  err => {
+    if (
+      err.code ===
+        'ENOSPC' ||
+      err.errno ===
+        -28 ||
+      err.message?.includes(
+        'no space left on device'
+      )
+    ) {
+      console.error(
+        '⚠️ ENOSPC Error. Attempting cleanup...'
+      );
+
+      const {
+        cleanupOldFiles
+      } =
+        require(
+          './utils/cleanup'
+        );
+
+      cleanupOldFiles();
+
+      return;
+    }
+
+    console.error(
+      'Uncaught Exception:',
+      err
+    );
+  }
+);
+
+process.on(
+  'unhandledRejection',
+  err => {
+    if (
+      err.code ===
+        'ENOSPC' ||
+      err.errno ===
+        -28 ||
+      err.message?.includes(
+        'no space left on device'
+      )
+    ) {
+      console.warn(
+        '⚠️ ENOSPC Error. Attempting cleanup...'
+      );
+
+      const {
+        cleanupOldFiles
+      } =
+        require(
+          './utils/cleanup'
+        );
+
+      cleanupOldFiles();
+
+      return;
+    }
+
+    if (
+      err.message &&
+      err.message.includes(
+        'rate-overlimit'
+      )
+    ) {
+      console.warn(
+        '⚠️ Rate limit reached.'
+      );
+
+      return;
+    }
+
+    console.error(
+      'Unhandled Rejection:',
+      err
+    );
+  }
+);
+
+// --------------------------------------------------
+// EXPORT
+// --------------------------------------------------
+
+module.exports = {
+  store
+};
+
