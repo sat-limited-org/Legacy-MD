@@ -87,3 +87,26 @@ console.warn = (...args) => {
 // --------------------------------------------------
 // LIBRARIES
 // --------------------------------------------------
+
+const pino = require('pino');
+
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason,
+  fetchLatestBaileysVersion
+} = require('@whiskeysockets/baileys');
+
+const qrcode = require('qrcode-terminal');
+
+const config = require('./config');
+const handler = require('./handler');
+
+const fs = require('fs');
+const path = require('path');
+const zlib = require('zlib');
+const os = require('os');
+
+// --------------------------------------------------
+// PUPPETEER CACHE CLEANUP
+// --------------------------------------------------
