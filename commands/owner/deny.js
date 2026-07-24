@@ -1,44 +1,37 @@
-'use strict';
+// commands/disallow.js
+import fs from 'fs';
+import path from 'path';
 
-const fs = require('fs');
-const path = require('path');
-
-const dbPath = path.join(__dirname, '../../database/allowedGroups.json');
-
-module.exports = {
-    name: 'deny',
-    aliases: ['disallow', 'gcdenuy', 'gcd'],
-    description: 'Remove this group from the allowed list.',
-    usage: '.deny',
-    ownerOnly: true,
-    groupOnly: true,
-
-    async execute(sock, msg, args, extra) {
-        const from = extra.from;
-        const sender = extra.sender;
-
-        if (!from.endsWith('@g.us')) {
-            return sock.sendMessage(from, {
-                text: '❌ This command can only be used in groups.'
-            }, { quoted: msg });
+const disallowGroupCommand = {
+    name: 'disallow',
+    category: 'admin',
+    permission: 'sudo',
+    owner: 'true',
+    sudo: 'true',
+    private: 'true',
+    async execute(sock, msg, args) {
+        const jid = msg.key.remoteJid;
+        if (!jid.endsWith('@g.us')) {
+            return sock.sendMessage(jid, { text: '❌ This command can only be used inside a group chat.' });
         }
 
-        let groups = [];
-
-        if (fs.existsSync(dbPath)) {
-            try {
-                groups = JSON.parse(fs.readFileSync(dbPath, 'utf8'));
-            } catch (e) {
-                groups = [];
-            }
+        const filePath = path.resolve('./data/allowedGroups.json');
+        
+        // Read existing array safely
+        let allowedGroups = [];
+        if (fs.existsSync(filePath)) {
+            allowedGroups = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
         }
 
-        groups = groups.filter(id => id !== from);
+        // Check if group is missing from file
+        if (!allowedGroups.includes(jid)) {
+            return sock.sendMessage(jid, { text: 'ℹ️ This group is not on the allowlist.' });
+        }
 
-        fs.writeFileSync(dbPath, JSON.stringify(groups, null, 2));
+        // Remove, save, and respond
+        allowedGroups = allowedGroups.filter(id => id !== jid);
+        fs.writeFileSync(filePath, JSON.stringify(allowedGroups, null, 4));
 
-        await sock.sendMessage(from, {
-            text: '🚫 This group is no longer allowed to use the bot.'
-        }, { quoted: msg });
+        await sock.sendMessage(jid, { text: '🚫 Access revoked. This group is now disallowed.' });
     }
 };
