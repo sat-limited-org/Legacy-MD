@@ -714,3 +714,115 @@ if (
       // ----------------------------------------------
       // CONNECTION CLOSED
       // ----------------------------------------------
+
+
+      if (
+        connection ===
+        'close'
+      ) {
+        clearInterval(
+          watchdogInterval
+        );
+
+        const statusCode =
+          lastDisconnect
+            ?.error
+            ?.output
+            ?.statusCode;
+
+        const errorMessage =
+          lastDisconnect
+            ?.error
+            ?.message ||
+          'Unknown error';
+
+        const shouldReconnect =
+          statusCode !==
+          DisconnectReason.loggedOut;
+
+        if (
+          statusCode ===
+            515 ||
+          statusCode ===
+            503 ||
+          statusCode ===
+            408
+        ) {
+          console.log(
+            `⚠️ Connection closed (${statusCode}). Reconnecting...`
+          );
+        } else {
+          console.log(
+            'Connection closed due to:',
+            errorMessage,
+            '\nReconnecting:',
+            shouldReconnect
+          );
+        }
+
+        if (
+          shouldReconnect
+        ) {
+          setTimeout(
+            () =>
+              startBot(),
+            3000
+          );
+        }
+      }
+
+      // ----------------------------------------------
+      // CONNECTION OPEN
+      // ----------------------------------------------
+
+      else if (
+        connection ===
+        'open'
+      ) {
+        lastActivity =
+          Date.now();
+
+        console.log(
+          '\n✅ Bot connected successfully!'
+        );
+
+        console.log(
+          `📱 Bot Number: ${sock.user.id.split(':')[0]}`
+        );
+
+        console.log(
+          `🤖 Bot Name: ${config.botName}`
+        );
+
+        console.log(
+          `⚡ Prefix: ${config.prefix}`
+        );
+
+        const ownerNames =
+          Array.isArray(
+            config.ownerName
+          )
+            ? config.ownerName.join(
+                ','
+              )
+            : config.ownerName;
+
+        console.log(
+          `👑 Owner: ${ownerNames}\n`
+        );
+
+        console.log(
+          'Bot is ready to receive messages!\n'
+        );
+
+        // ------------------------------------------
+        // DEPLOYMENT GROUP MESSAGE
+        // ------------------------------------------
+
+        await sendDeploymentMessage(
+          sock
+        );
+
+        // ------------------------------------------
+        // BOT STATUS
+        // ------------------------------------------
