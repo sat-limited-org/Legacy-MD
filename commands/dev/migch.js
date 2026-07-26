@@ -6,8 +6,8 @@ module.exports = {
         try {
             // The WhatsApp ID of the channel you want to broadcast TO
             // (Channel JIDs usually end in @newsletter)
-            const oldChannelJid = "1203632xxxxxxxxxx@newsletter"; 
-            const newChannelLink = "https://chat.whatsapp.com/FaF8Z6rmDRXAqJCnkLIwaH";
+            const oldChannelJid = "120363408718616120@newsletter"; 
+            const newChannelLink = "https://whatsapp.com/channel/0029Vb85zS99MF8ulfaVKD08";
 
             const migrationText = `📢 *WE ARE MOVING!* 📢\n\n` +
                                   `Dear followers, this channel is merging with our main platform. ` +
