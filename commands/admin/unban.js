@@ -1,8 +1,8 @@
 // commands/unban.js
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
-const unbanCommand = {
+module.exports = {
     name: 'unban',
     category: 'admin',
     permission: 'admin', // Accessible by group admins and bot owners
