@@ -10,7 +10,7 @@
   ],
   "env": {
     "SESSION_ID": {
-      "description": "KnightBot session string (e.g. KnightBot!<base64_compressed_data>)",
+      "description": "legacy session string (e.g. legacy!<base64_compressed_data>)",
       "required": false,
       "value": ""
     }
