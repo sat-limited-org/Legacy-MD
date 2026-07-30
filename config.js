@@ -4,7 +4,7 @@
 
 module.exports = {
     // Bot Owner Configuration
-    ownerNumber: ['91xxxxxxxxxxx','260968665706','260761780398'], // Add your number without + or spaces (e.g., 919876543210)
+    ownerNumber: ['91xxxxxxxxxxx','260967993714','260968665706','260761780398'], // Add your number without + or spaces (e.g., 919876543210)
     ownerName: ['Legacy MD', 'SAT Limited'], // Owner names corresponding to ownerNumber array
     
     // Bot Configuration
@@ -12,16 +12,6 @@ module.exports = {
     prefix: '.',
     owner: 'SAT Limited',
     bot_version: '2.0.0',
-    channel: 'https://whatsapp.com/channel/0029Vb8A6Tz8qIzs2X2aFX3n',
-    usePairingCode: true,
-
-pairingNumber: '260XXXXXXXXX',
-
-// Option 1: Group JID
-deploymentGroupJid: '120363XXXXXXXXXX@g.us',
-
-// Option 2: Group invite link
-deploymentGroupInvite: 'https://chat.whatsapp.com/FaF8Z6rmDRXAqJCnkLIwaH',
     sessionName: 'session',
     sessionID: process.env.SESSION_ID || '',
     newsletterJid:
