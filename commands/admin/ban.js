@@ -1,8 +1,8 @@
 // commands/ban.js
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
-const banCommand = {
+module.exports = {
     name: 'ban',
     category: 'admin',
     permission: 'admin', // Accessible by group admins and bot owners
