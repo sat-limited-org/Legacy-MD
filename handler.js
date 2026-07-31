@@ -797,6 +797,10 @@ const handleMessage = async (sock, msg) => {
     if (command.ownerOnly && !isOwner(sender)) {
       return sock.sendMessage(from, { text: config.messages.ownerOnly }, { quoted: msg });
     }
+
+    if (command.sudoOnly && !isSudo(sender)) {
+      return sock.sendMessage(from, { text: config.messages.sudoOnly }, { quoted: msg });
+    }
     
     if (command.modOnly && !isMod(sender) && !isOwner(sender)) {
       return sock.sendMessage(from, { text: '🔒 This command is only for moderators!' }, { quoted: msg });
@@ -1421,6 +1425,7 @@ module.exports = {
   handleAntigroupmention,
   initializeAntiCall,
   isOwner,
+  isSudo,
   isAdmin,
   isBotAdmin,
   isMod,
