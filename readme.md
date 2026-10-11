@@ -1,9 +1,9 @@
-⚠️ Legacy MD — Repository Moved
+## ⚠️ Legacy MD — Repository Moved
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Moved-orange?style=for-the-badge" alt="Repository Moved">
   <img src="https://img.shields.io/badge/Maintained-SAT%20Limited-green?style=for-the-badge" alt="Maintained by SAT Limited">
-</p>📢 Important Announcement
+ </p>📢 Important Announcement
 
 Legacy MD has moved to a new repository!
 
@@ -23,7 +23,7 @@ https://github.com/SAT-Limited-Organization/Legacy-MD
 
 Please visit the official repository for the latest source code, updates, installation instructions, and support.
 
-⚠️ Important Information
+## ⚠️ Important Information
 
 - 🆕 Latest Version: Available in the official repository.
 - 🛠️ Development: Follow the official repository for ongoing development.
@@ -31,7 +31,7 @@ Please visit the official repository for the latest source code, updates, instal
 - 📖 Documentation: Read the official README for setup and usage instructions.
 - 🔄 Updates: This repository is retained for reference and is no longer the primary development repository.
 
-👑 About Legacy MD
+### 👑 About Legacy MD
 
 Legacy MD is a WhatsApp bot powered by SAT Limited, designed to provide useful commands and automation features for WhatsApp users.
 
